@@ -1,32 +1,31 @@
 import datetime
 import makara
 
-
 weekdays = {1:"Понедельник",2:"Вторник",3:"Среда",4:"Четверг",5:"Пятница",6:"Суббота",7:"Воскресенье"}
-deno_nume = {0:"Числитель",1:"Знаменатель"}
+fraction = {1:"Числитель",0:"Знаменатель"}
 
-final_dict = {}
-final_list = []
-
-reader = datetime.datetime.today().isocalendar()[2]
-week = datetime.datetime.today().isocalendar()[1]
-
-final = int(week) % 2
-
+total_info = {}
+list_of_lessons = []
 c = 1
 
-if int(reader) == 1:
-	handler = makara.numerator[reader-1]
-	for i in range(0,len(makara.numerator[reader])):
-		final_list.append(handler[i])
-else:
-	handler = makara.denominator[reader-1]
-	for i in range(0,len(makara.denominator[reader])):
-		final_list.append(handler[i])
+day = datetime.datetime.today().isocalendar()[2]
+week = datetime.datetime.today().isocalendar()[1]
 
-final_dict["Fraction"] = deno_nume[final]
-final_dict["Count_of_week"] = week
-final_dict["Weekday"] = weekdays[reader]
-final_dict["lessons"] = final_list
+calc = int(week) % 2
 
-print(final_dict)
+if calc == 1:
+	handler = MakaraTest.numerator[day-1]
+	for i in range(0,len(MakaraTest.numerator[day-1])):
+		list_of_lessons.append(handler[i])
+elif calc == 0:
+	handler = MakaraTest.denominator[day-1]
+	for i in range(0,len(MakaraTest.denominator[day-1])):
+		list_of_lessons.append(handler[i])
+
+total_info["Fraction"] = fraction[calc]
+total_info["Count_of_week"] = week
+total_info["Weekday"] = weekdays[day]
+total_info["lessons"] = list_of_lessons
+
+print(total_info)
+
