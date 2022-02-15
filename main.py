@@ -28,3 +28,4 @@ else:
 	for i in range(0,len(makara.denominator[reader])):
 		print(str(c)+")",handler[i])
 		c+=1
+# Any
