@@ -1,5 +1,5 @@
 import psycopg2 as ps
-from loguru import logger
+# from loguru import logger
 
 from data.config import *
 
@@ -21,11 +21,11 @@ async def create_connection(host: str = None,
     """
     db_connection = None
 
-    _host = host or HOST
-    _port = port or PORT
+    _host = host or DB_HOST
+    _port = port or DB_PORT
     _db_name = db_name or DB_NAME
-    _username = username or USER
-    _password = password or PASSWORD
+    _username = username or DB_USER
+    _password = password or DB_PASS
 
     try:
         db_connection = ps.connect(
@@ -35,9 +35,11 @@ async def create_connection(host: str = None,
             user=_username,
             password=_password,
         )
-        logger.info("[OPEN] Connection to PostgreSQL is successful!")
+        # logger.info("[OPEN] Connection to PostgreSQL is successful!")
+        print("[OPEN] Connection to PostgreSQL is successful!")
     except (Exception, ps.OperationalError) as error:
-        logger.error(f"An error occurred: {error}")
+        # logger.error(f"An error occurred: {error}")
+        print(f"An error occurred: {error}")
     return db_connection
 
 
@@ -56,18 +58,22 @@ async def execute_read_query(query: str = None):
         cursor.execute(query)
         result = cursor.fetchall()
 
-        logger.info(f'Read-request "{query}" completed successfully!')
-        logger.debug(f"Total rows count = {cursor.rowcount}")
+        # logger.info(f'Read-request "{query}" completed successfully!')
+        # logger.debug(f"Total rows count = {cursor.rowcount}")
 
+        print(f'Read-request "{query}" completed successfully!')
+        print(f"Total rows count = {cursor.rowcount}")
         return result
 
     except (Exception, ps.OperationalError) as error:
-        logger.error(error)
+        # logger.error(error)
+        print(error)
     finally:
         if connection:
             cursor.close()
             connection.close()
-            logger.info("[CLOSED] Connection to PostgreSQL is successfully closed!")
+            # logger.info("[CLOSED] Connection to PostgreSQL is successfully closed!")
+            print("[CLOSED] Connection to PostgreSQL is successfully closed!")
 
 
 async def execute_write_query(data: tuple = None,
@@ -92,19 +98,23 @@ async def execute_write_query(data: tuple = None,
         if isinstance(data, tuple):
             query = f"INSERT INTO {table} ({columns}) VALUES {data}"
         else:
-            logger.warning(f"The type of 'data' ({type(data)}) is not a tuple! Request may contains an errors!")
+            # logger.warning(f"The type of 'data' ({type(data)}) is not a tuple! Request may contains an errors!")
+            print(f"The type of 'data' ({type(data)}) is not a tuple! Request may contains an errors!")
             query = f"INSERT INTO {table} ({columns}) VALUES ({data})"
 
         cursor = connection.cursor()
         cursor.execute(query, data)
         connection.commit()
 
-        logger.info(f'Write-request "{query}" completed successfully!')
+        # logger.info(f'Write-request "{query}" completed successfully!')
+        print(f'Write-request "{query}" completed successfully!')
         return True
     except (Exception, ps.OperationalError) as error:
-        logger.error(error)
+        # logger.error(error)
+        print(error)
         return False
     finally:
         cursor.close()
         connection.close()
-        logger.info("[CLOSED] Connection to PostgreSQL is successfully closed!")
+        # logger.info("[CLOSED] Connection to PostgreSQL is successfully closed!")
+        print("[CLOSED] Connection to PostgreSQL is successfully closed!")
