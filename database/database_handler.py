@@ -1,14 +1,15 @@
 import psycopg2 as ps
 # from loguru import logger
+import logging
 
 from data.config import *
 
 
-async def create_connection(host: str = None,
-                            port: str = None,
-                            db_name: str = None,
-                            username: str = None,
-                            password: str = None):
+def create_connection(host: str = None,
+                      port: str = None,
+                      db_name: str = None,
+                      username: str = None,
+                      password: str = None):
     """
     This function creates connection to database.
 
@@ -35,15 +36,13 @@ async def create_connection(host: str = None,
             user=_username,
             password=_password,
         )
-        # logger.info("[OPEN] Connection to PostgreSQL is successful!")
-        print("[OPEN] Connection to PostgreSQL is successful!")
+        logging.info("[OPEN] Connection to PostgreSQL is successful!")
     except (Exception, ps.OperationalError) as error:
-        # logger.error(f"An error occurred: {error}")
-        print(f"An error occurred: {error}")
+        logging.error(f"An error occurred: {error}")
     return db_connection
 
 
-async def execute_read_query(query: str = None):
+def execute_read_query(query: str = None):
     """
     Executes the read request.
 
@@ -76,7 +75,7 @@ async def execute_read_query(query: str = None):
             print("[CLOSED] Connection to PostgreSQL is successfully closed!")
 
 
-async def execute_write_query(data: tuple = None,
+def execute_write_query(data: tuple = None,
                               table: str = None,
                               columns: str = None) -> bool:
     """
