@@ -14,12 +14,12 @@ week = datetime.datetime.today().isocalendar()[1]
 calc = int(week) % 2
 
 if calc == 1:
-	handler = MakaraTest.numerator[day-1]
-	for i in range(0,len(MakaraTest.numerator[day-1])):
+	handler = makara.numerator[day-1]
+	for i in range(0,len(makara.numerator[day-1])):
 		list_of_lessons.append(handler[i])
 elif calc == 0:
-	handler = MakaraTest.denominator[day-1]
-	for i in range(0,len(MakaraTest.denominator[day-1])):
+	handler = makara.denominator[day-1]
+	for i in range(0,len(makara.denominator[day-1])):
 		list_of_lessons.append(handler[i])
 
 total_info["Fraction"] = fraction[calc]
