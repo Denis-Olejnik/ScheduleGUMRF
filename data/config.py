@@ -17,5 +17,5 @@ DB_PASS = env.str("DB_PASS")
 HOOK_URL = env.str("HOOK_URL")
 
 # Telegram
-TG_TOKEN = env.str("TG_TOKEN")
-
+# TG_TOKEN = env.str("TG_TOKEN")
+TG_TOKEN = "1105199057:AAHePQVSQrmbsGOIFVtZ3FQMQ6RVaOzxKSQ"
