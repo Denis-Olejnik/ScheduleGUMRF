@@ -11,3 +11,11 @@ DB_PORT = env.str("DB_PORT")
 DB_NAME = env.str("DB_NAME")
 DB_USER = env.str("DB_USER")
 DB_PASS = env.str("DB_PASS")
+
+
+# Heroku
+HOOK_URL = env.str("HOOK_URL")
+
+# Telegram
+TG_TOKEN = env.str("TG_TOKEN")
+
