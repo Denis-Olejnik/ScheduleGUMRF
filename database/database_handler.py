@@ -2,8 +2,6 @@ import psycopg2 as ps
 # from loguru import logger
 import logging
 
-from data.config import *
-
 
 def create_connection(host: str = None,
                       port: str = None,
