@@ -8,7 +8,7 @@ from aiogram.types import InputTextMessageContent, input_message_content
 from data.config import TG_TOKEN, HOOK_URL
 import psycopg2 as ps
 
-database = ps.connect(os.environ.get("DATABASE_URL"), ssl='require')
+database = ps.connect(os.environ.get("DATABASE_URL"), sslmode='require')
 curr = database.cursor()
 
 bot = Bot(token=TG_TOKEN)
