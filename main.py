@@ -4,19 +4,19 @@ import makara
 weekdays = {1:"Понедельник",2:"Вторник",3:"Среда",4:"Четверг",5:"Пятница",6:"Суббота",7:"Воскресенье"}
 fraction = {1:"Числитель",0:"Знаменатель"}
 
-total_info = {}
-list_of_lessons = []
-c = 1
+total_info = {} # Словарь для конечного вывода
+list_of_lessons = [] # Список для вывода пар
 
 day = datetime.datetime.today().isocalendar()[2]
 week = datetime.datetime.today().isocalendar()[1]
 
-calc = int(week) % 2
-
-if calc == 1:
+calc = int(week) % 2 #Расчёт числителя или знаменателя
+# Обработка для Числителя
+if calc == 1: 
 	handler = makara.numerator[day-1]
 	for i in range(0,len(makara.numerator[day-1])):
 		list_of_lessons.append(handler[i])
+# Обработка для Знаменателя
 elif calc == 0:
 	handler = makara.denominator[day-1]
 	for i in range(0,len(makara.denominator[day-1])):
