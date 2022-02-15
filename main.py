@@ -1,5 +1,5 @@
 import datetime
-import MakaraTest
+import makara
 
 
 weekdays = {1:"Понедельник",2:"Вторник",3:"Среда",4:"Четверг",5:"Пятница",6:"Суббота",7:"Воскресенье"}
@@ -16,12 +16,12 @@ final = int(week) % 2
 c = 1
 
 if int(reader) == 1:
-	handler = MakaraTest.numerator[reader-1]
-	for i in range(0,len(MakaraTest.numerator[reader])):
+	handler = makara.numerator[reader-1]
+	for i in range(0,len(makara.numerator[reader])):
 		final_list.append(handler[i])
 else:
-	handler = MakaraTest.denominator[reader-1]
-	for i in range(0,len(MakaraTest.denominator[reader])):
+	handler = makara.denominator[reader-1]
+	for i in range(0,len(makara.denominator[reader])):
 		final_list.append(handler[i])
 
 final_dict["Fraction"] = deno_nume[final]
