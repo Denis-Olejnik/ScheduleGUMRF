@@ -28,22 +28,22 @@ async def on_shutdown(dp):
     database.close()
 
 
-@dp.message_handler(commands=['start'], commands_prefix='!/', ignore_case=True)
+@dp.message_handler(commands=['start'], commands_prefix='!/')
 async def on_start_message(message: types.Message):
     await message.answer(f"I got ur /start message,{message.from_user.first_name}!")
 
 
-@dp.message_handler(commands=['new'], commands_prefix='!/', ignore_case=True)
+@dp.message_handler(commands=['new'], commands_prefix='!/')
 async def on_start_message(message: types.Message):
     await message.answer(f"I got ur /new message,{message.from_user.first_name}!")
 
 
-@dp.message_handler(commands=['edit'], commands_prefix='!/', ignore_case=True)
+@dp.message_handler(commands=['edit'], commands_prefix='!/')
 async def on_start_message(message: types.Message):
     await message.answer(f"I got ur /edit message,{message.from_user.first_name}!")
 
 
-@dp.message_handler(commands=['delete'], commands_prefix='!/', ignore_case=True)
+@dp.message_handler(commands=['delete'], commands_prefix='!/')
 async def on_start_message(message: types.Message):
     await message.answer(f"DON'T TOUCH IT! OK?")
 
