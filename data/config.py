@@ -18,5 +18,4 @@ env.read_env()
 HOOK_URL = "https://schedule-gumrf.herokuapp.com/"
 
 # Telegram
-# TG_TOKEN = env.str("TG_TOKEN")
-TG_TOKEN = "1105199057:AAHePQVSQrmbsGOIFVtZ3FQMQ6RVaOzxKSQ"
+TG_TOKEN = env.str("TG_TOKEN")
