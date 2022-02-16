@@ -32,19 +32,22 @@ def main():
 	total_info["lessons"] = list_of_lessons
 
 	print(total_info)
+	
 def timer():
 
-	dt = datetime.datetime.now().replace(hour=int(list_of_time[0][0:2]),minute=int(list_of_time[0][3:5]))
-	dt_now = datetime.datetime.now()
+	for i in range(0,len(list_of_time)):
+		dt = datetime.datetime.now().replace(hour=int(list_of_time[i][0:2]),minute=int(list_of_time[i][3:5]))
+		dt_now = datetime.datetime.now()
 
-	time_interval = dt - dt_now
-	converter = time_interval.total_seconds()
-	
-	# print("Время до пары:",converter)
-	# print("Время до напоминания", int(converter)-600)
+		# print(str(dt_now.hour)+":"+str(dt_now.minute))
+		# print(str(dt.hour)+":"+str(dt.minute))
 
-	# time.sleep(int(converter)-600)
+		time_interval = dt - dt_now
+		converter = time_interval.total_seconds()
 
-	# print("Para scoro")
+		# print("Время до пары:",converter)
+		# print("Время до напоминания:", int(converter)-600)
+
+		# time.sleep(int(converter)-600)
 
 
