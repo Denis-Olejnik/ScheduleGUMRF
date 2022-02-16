@@ -32,7 +32,7 @@ def main():
 	total_info["lessons"] = list_of_lessons
 
 	print(total_info)
-	
+
 def timer():
 
 	for i in range(0,len(list_of_time)):
@@ -49,5 +49,14 @@ def timer():
 		# print("Время до напоминания:", int(converter)-600)
 
 		# time.sleep(int(converter)-600)
-
+		
+def user_timer():
+	dt_user = datetime.datetime.now().replace(hour=int(user_time[0:2]),minute=int(user_time[3:5]))
+	dt_now_user = datetime.datetime.now()
+	time_interval_user = dt_user - dt_now_user
+	converter_user = time_interval_user.total_seconds()
+	# print("Текущее время:",dt_now_user.strftime("%H:%M"))
+	# print("Ожидание:",int(converter_user),"секунд")
+	time.sleep(int(converter_user))
+	# print("Время ожидания окончено")
 
