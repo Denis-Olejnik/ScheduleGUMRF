@@ -1,11 +1,11 @@
-import logging
-
-from aiogram import types
-from aiogram.dispatcher.filters import CommandStart
-
-from loader import dp
+from aiogram import Dispatcher, types
+from loguru import logger
 
 
-@dp.message_handler(CommandStart())
 async def cmd_start(message: types.Message):
-    logging.info(f"User {message.from_user.id} start conversation with bot!")
+    logger.info(f"User @{message.from_user.username} [{message.from_user.id}] start conversation with bot!")
+
+
+def register_handlers_base(dp: Dispatcher):
+    dp.register_message_handler(cmd_start, commands=['start'])
+    logger.debug("Handler registered!")

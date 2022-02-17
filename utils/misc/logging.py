@@ -1,5 +1,4 @@
-import logging
+from loguru import logger
 
-logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
-                    level=logging.INFO
-                    )
+logger.add("app.log", format="{time} {level} {message}", rotation="10 MB", compression="zip",
+           level="DEBUG")

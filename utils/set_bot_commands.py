@@ -1,4 +1,5 @@
 from aiogram import types
+from loguru import logger
 
 
 async def set_default_commands(dp):
@@ -10,3 +11,4 @@ async def set_default_commands(dp):
             types.BotCommand("del", "Удалить расписание")
         ]
     )
+    logger.debug("Default commands setup complete!")

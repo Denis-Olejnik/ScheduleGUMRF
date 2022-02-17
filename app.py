@@ -1,15 +1,15 @@
-import logging
-
 from aiogram import executor
 
 from data import config
+from handlers import base
 from loader import dp, bot
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
 
+base.register_handlers_base(dp)
+
 
 async def on_startup(dispatcher):
-    logging.info("started up")
     await set_default_commands(dispatcher)
     await on_startup_notify(dispatcher)
 
