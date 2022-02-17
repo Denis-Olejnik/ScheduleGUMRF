@@ -11,8 +11,41 @@ import psycopg2 as ps
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(name)s - %(levelname)s - %(message)s')
 
-database = ps.connect(os.environ.get("DATABASE_URL"), sslmode='require')
-curr = database.cursor()
+database_connection = ps.connect(os.environ.get("DATABASE_URL"), sslmode='require')
+
+
+def execute_read_query(query: str = None):
+    """
+    Executes the read request.
+
+    :param query: Request text
+    :return: list of tuples [(content_id, author_id, ***), (content_id, author_id, ***)]
+    """
+
+    connection = database_connection
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # logger.info(f'Read-request "{query}" completed successfully!')
+        # logger.debug(f"Total rows count = {cursor.rowcount}")
+
+        print(f'Read-request "{query}" completed successfully!')
+        print(f"Total rows count = {cursor.rowcount}")
+        return result
+
+    except (Exception, ps.OperationalError) as error:
+        # logger.error(error)
+        print(error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+            # logger.info("[CLOSED] Connection to PostgreSQL is successfully closed!")
+            print("[CLOSED] Connection to PostgreSQL is successfully closed!")
+
 
 bot = Bot(token=os.environ.get("TG_TOKEN"))
 dp = Dispatcher(bot)
@@ -24,8 +57,7 @@ async def on_startup(dp):
 
 async def on_shutdown(dp):
     await bot.delete_webhook()
-    curr.close()
-    database.close()
+    database_connection.close()
 
 
 @dp.message_handler(commands=['start'], commands_prefix='!/')
@@ -46,6 +78,16 @@ async def on_start_message(message: types.Message):
 @dp.message_handler(commands=['delete'], commands_prefix='!/')
 async def on_start_message(message: types.Message):
     await message.answer(f"DON'T TOUCH IT! OK?")
+
+
+@dp.message_handler(commands=['get'], commands_prefix='!/')
+async def on_get_message(message: types.Message):
+    await message.answer("Введи день недели (1-5): ")
+    # answer = message.text
+
+    data = execute_read_query("SELECT * FROM schedule WHERE group_code = 'IS_31_4';")
+
+    await message.answer(str(data))
 
 
 executor.start_webhook(dispatcher=dp,
