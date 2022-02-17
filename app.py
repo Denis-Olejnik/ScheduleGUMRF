@@ -1,12 +1,13 @@
 from aiogram import executor
 
 from data import config
-from handlers import base
+from handlers import base, user_survey
 from loader import dp, bot
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
 
 base.register_handlers_base(dp)
+user_survey.register_handlers_sm_user(dp)
 
 
 async def on_startup(dispatcher):
