@@ -17,17 +17,17 @@ async def on_startup(dispatcher):
     await on_startup_notify(dispatcher)
     await postgre.create_connection()
 
-    if not config.DEBUG_MODE:
+    if not config.RUN_LOCAL:
         await bot.set_webhook(config.POSTGRES_URI)
 
 
 async def on_shutdown(dispatcher):
-    if not config.DEBUG_MODE:
+    if not config.RUN_LOCAL:
         await bot.delete_webhook()
 
 
 if __name__ == "__main__":
-    if config.DEBUG_MODE:
+    if config.RUN_LOCAL:
         executor.start_polling(dispatcher=dp, on_startup=on_startup)
     else:
         executor.start_webhook(dispatcher=dp,

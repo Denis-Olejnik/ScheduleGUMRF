@@ -1,5 +1,7 @@
+import random
+import secrets
+
 import psycopg2 as ps
-from _distutils_hack import override
 from loguru import logger
 
 from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_URI
@@ -126,3 +128,21 @@ async def has_user_registered(user_id: int) -> bool:
     except (Exception, ps.OperationalError, ps.DataError) as error:
         logger.exception(error)
         return False
+
+
+async def get_user_schedule_for_day(user_group: str, week_day: str | int, fractional: int):
+    fraction = None
+
+    if int(fractional) == 0:
+        fraction = "denominator"
+    elif int(fractional) == 1:
+        fraction = "numerator"
+
+    query = f"SELECT schedule_{fraction} from schedule_new WHERE group_code = '{user_group}' and week_day='{week_day}'"
+
+    logger.debug(f"Try to execute query: \"{query}\"")
+
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    return result

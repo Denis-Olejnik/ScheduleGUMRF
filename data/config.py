@@ -4,6 +4,7 @@ env = Env()
 env.read_env()
 
 DEBUG_MODE = env.bool("DEBUG_MODE")
+RUN_LOCAL = env.bool("RUN_LOCAL")
 
 TELEGRAM_TOKEN = env.str("TELEGRAM_TOKEN")
 TELEGRAM_ADMINS = env.list("TELEGRAM_ADMINS")

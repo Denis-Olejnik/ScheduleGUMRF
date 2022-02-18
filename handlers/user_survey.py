@@ -20,7 +20,7 @@ class FSMUserSurvey(StatesGroup):
 
     group_name = State()  # Which group does the user belong to?
     subgroup_code = State()  # Which subgroup?
-    is_leader = State()  # Is the user a group leader?
+    # is_leader = State()  # Is the user a group leader?
 
     registration_stamp = State()
 
@@ -45,7 +45,7 @@ async def sm_start(message: types.Message):
 
     await FSMUserSurvey.group_name.set()
 
-    await message.reply(texts.sm_user_group_code)
+    await dp.bot.send_message(user_id, text=texts.sm_user_group_code)
 
 
 async def cancel_user_survey(message: types.Message, state: FSMContext):
@@ -77,7 +77,7 @@ async def sm_subgroup_code(message: types.Message, state: FSMContext):
 
     await FSMUserSurvey.next()
 
-    await message.reply(texts.sm_user_group_leader, reply_markup=keyboard_group_leader)
+    # await message.reply(texts.sm_user_group_leader, reply_markup=keyboard_group_leader)
 
 # async def sm_subgroup_code(call: types.ChatType, state: FSMContext):
 #     async with state.proxy() as data:
@@ -92,15 +92,14 @@ async def sm_subgroup_code(message: types.Message, state: FSMContext):
 
 
 # Get user status in group:
-async def sm_is_leader(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['is_leader'] = str(message.text)
-
-    await FSMUserSurvey.next()
+# async def sm_is_leader(message: types.Message, state: FSMContext):
+    # async with state.proxy() as data:
+    #     data['is_leader'] = str(message.text)
+    #
+    # await FSMUserSurvey.next()
 
     data_parsed = f"Группа: {data['group_name']}\n" \
                   f"Подгруппа: {data['subgroup_code']}\n" \
-                  f"Являешься старостой: {data['is_leader']}\n" \
 
     message_check = f"{texts.sm_everything_is_correct}\n{data_parsed}"
     await dp.bot.send_message(message.from_user.id, message_check, reply_markup=keyboard_results)
@@ -119,12 +118,11 @@ async def sm_set_registration_stamp(message: types.Message, state: FSMContext):
 
         else:
             await postgre.execute_write_query('users', tuple(data.values()),
-                                              'user_id, group_name, subgroup_code, is_leader, registration_stamp')
+                                              'user_id, group_name, subgroup_code, registration_stamp')
 
             await message.reply(texts.sm_we_got_it)
 
-        data_parsed = f"group_name: {data['group_name']}, subgroup_code: {data['subgroup_code']}, " \
-                      f"is_leader: {data['is_leader']}"
+        data_parsed = f"group_name: {data['group_name']}, subgroup_code: {data['subgroup_code']}"
 
         logger.info(f"User {message.from_user.id} (@{message.from_user.username}) "
                     f"uploaded the following information: {data_parsed}")
@@ -142,7 +140,7 @@ def register_handlers_sm_user(dp: Dispatcher):
 
     dp.register_message_handler(sm_group_name, state=FSMUserSurvey.group_name)
     dp.register_message_handler(sm_subgroup_code, state=FSMUserSurvey.subgroup_code)
-    dp.register_message_handler(sm_is_leader, state=FSMUserSurvey.is_leader)
+    # dp.register_message_handler(sm_is_leader, state=FSMUserSurvey.is_leader)
     dp.register_message_handler(sm_set_registration_stamp, state=FSMUserSurvey.registration_stamp)
 
     logger.debug("State machine registered!")
@@ -152,4 +150,4 @@ def register_handlers_sm_user(dp: Dispatcher):
 #  TOOD: Проверять корректность названия группы
 #  TODO: Сделать запись в БД
 #  TODO: Если что-то заполнено неправильно, то следует дать возможность исправить (или начать сначала)
-
+#  TODO: Отлавливать сторонние команды ('/start')
