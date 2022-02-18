@@ -109,3 +109,20 @@ async def execute_write_query_state(state):
         print(tuple(data.values()))
         cursor.execute("INSERT INTO users VALUES %s)", tuple(data.values()))
         db_connection.commit()
+
+
+async def has_user_registered(user_id: int) -> bool:
+    """
+    Is the user registered in the 'users' database?.
+
+    :param user_id: user id from message
+    :return: TRUE, if the user is found.
+    """
+    query = f"SELECT EXISTS(SELECT 1 FROM users WHERE user_id={user_id})"
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()[0][0]
+        return result
+    except (Exception, ps.OperationalError, ps.DataError) as error:
+        logger.exception(error)
+        return False

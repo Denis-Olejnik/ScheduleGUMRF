@@ -6,9 +6,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
 from loguru import logger
 
-
+from transliterate import translit
+import re
 from data import texts
+from data.config import DEBUG_MODE
 from database import postgre
+from keyboards import keyboard_subgroup_code, keyboard_group_leader, keyboard_results
 from loader import dp
 
 
@@ -22,14 +25,11 @@ class FSMUserSurvey(StatesGroup):
     registration_stamp = State()
 
 
-async def sm_start(message: types.Message, state: FSMContext):
-    await state.finish()
-
+async def sm_start(message: types.Message):
     user_id = message.from_user.id
-    user_has_registered = await postgre.execute_read_query(f"SELECT EXISTS(SELECT 1 FROM users "
-                                                           f"WHERE user_id={user_id})")
+    user_has_registered = await postgre.has_user_registered(user_id)
 
-    if user_has_registered[0][0]:
+    if user_has_registered:
         await message.reply("Похоже, что Вы уже проходили опрос.")
         logger.info(f"User @{message.from_user.username} [{message.from_user.id}] tried to start a survey!")
         return
@@ -59,11 +59,15 @@ async def cancel_user_survey(message: types.Message, state: FSMContext):
 # Get user group name:
 async def sm_group_name(message: types.message, state: FSMContext):
     async with state.proxy() as data:
-        data['group_name'] = str(message.text)
+        group_name = message.text.upper()
+        group_name = re.sub('[!@#$%&*()\\-+ \'\"]', '_', group_name)  # replace chars to '_'
+
+        group_name = translit(group_name, "ru", reversed=True)
+        data['group_name'] = group_name
 
     await FSMUserSurvey.next()
 
-    await message.reply(texts.sm_user_subgroup_code)
+    await message.reply(texts.sm_user_subgroup_code, reply_markup=keyboard_subgroup_code)
 
 
 # Get user subgroup code:
@@ -73,7 +77,18 @@ async def sm_subgroup_code(message: types.Message, state: FSMContext):
 
     await FSMUserSurvey.next()
 
-    await message.reply(texts.sm_user_group_leader)
+    await message.reply(texts.sm_user_group_leader, reply_markup=keyboard_group_leader)
+
+# async def sm_subgroup_code(call: types.ChatType, state: FSMContext):
+#     async with state.proxy() as data:
+#         if call == "subgroup_1":
+#             data['subgroup_code'] = 1
+#         elif call == "subgroup_2":
+#             data['subgroup_code'] = 2
+#
+#     await FSMUserSurvey.next()
+#
+#     await dp.bot.send_message(texts.sm_user_group_leader, reply_markup=keyboard_group_leader)
 
 
 # Get user status in group:
@@ -88,7 +103,7 @@ async def sm_is_leader(message: types.Message, state: FSMContext):
                   f"Являешься старостой: {data['is_leader']}\n" \
 
     message_check = f"{texts.sm_everything_is_correct}\n{data_parsed}"
-    await dp.bot.send_message(message.from_user.id, message_check)
+    await dp.bot.send_message(message.from_user.id, message_check, reply_markup=keyboard_results)
 
 
 # Validate typed data:
@@ -98,12 +113,15 @@ async def sm_set_registration_stamp(message: types.Message, state: FSMContext):
             timestamp = datetime.datetime.now().isoformat()
             data['registration_stamp'] = timestamp
 
-        await message.reply(texts.sm_we_got_it)
+        if DEBUG_MODE:
+            logger.warning(f"DEBUG_MODE is {DEBUG_MODE}. The data will not be sent!")
+            await message.reply(f"DEBUG_MODE is {DEBUG_MODE}. The data will not be sent!")
 
-        request = 'INSERT INTO users (user_id, group_name, subgroup_code, is_leader, registration_stamp) ' \
-                  'VALUES (%d, %s, %d, %s, %r)' % tuple(data.values())
+        else:
+            await postgre.execute_write_query('users', tuple(data.values()),
+                                              'user_id, group_name, subgroup_code, is_leader, registration_stamp')
 
-        await postgre.execute_write_query('users', tuple(data.values()), 'user_id, group_name, subgroup_code, is_leader, registration_stamp')
+            await message.reply(texts.sm_we_got_it)
 
         data_parsed = f"group_name: {data['group_name']}, subgroup_code: {data['subgroup_code']}, " \
                       f"is_leader: {data['is_leader']}"
