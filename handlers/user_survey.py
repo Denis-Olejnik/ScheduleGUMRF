@@ -1,3 +1,5 @@
+import datetime
+
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -6,101 +8,124 @@ from loguru import logger
 
 
 from data import texts
+from database import postgre
 from loader import dp
 
 
 class FSMUserSurvey(StatesGroup):
-    user_group_code = State()  # Which group does the user belong to?
-    user_subgroup_code = State()  # Which subgroup?
-    user_group_leader = State()  # Is the user a group leader?
-    all_correct = State()  # Everything is correct
+    user_id = State()
+
+    group_name = State()  # Which group does the user belong to?
+    subgroup_code = State()  # Which subgroup?
+    is_leader = State()  # Is the user a group leader?
+
+    registration_stamp = State()
 
 
-async def sm_start(message: types.Message):
+async def sm_start(message: types.Message, state: FSMContext):
+    await state.finish()
+
     user_id = message.from_user.id
+    user_has_registered = await postgre.execute_read_query(f"SELECT EXISTS(SELECT 1 FROM users "
+                                                           f"WHERE user_id={user_id})")
+
+    if user_has_registered[0][0]:
+        await message.reply("Похоже, что Вы уже проходили опрос.")
+        logger.info(f"User @{message.from_user.username} [{message.from_user.id}] tried to start a survey!")
+        return
+
+    logger.info(f"User @{message.from_user.username} [{message.from_user.id}] started the survey.")
 
     await dp.bot.send_message(user_id, texts.sm_welcome_message)
-    await FSMUserSurvey.user_group_code.set()
+
+    # get data and write it to state:
+    await FSMUserSurvey.user_id.set()
+    write_id_state = dp.get_current().current_state()
+    await write_id_state.update_data(user_id=user_id)
+
+    await FSMUserSurvey.group_name.set()
 
     await message.reply(texts.sm_user_group_code)
 
 
-async def sm_group_code(message: types.message, state: FSMContext):
+async def cancel_user_survey(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
+    await message.reply('Опрос отменён.')
+
+
+# Get user group name:
+async def sm_group_name(message: types.message, state: FSMContext):
     async with state.proxy() as data:
-        data['user_group_code'] = message.text
+        data['group_name'] = str(message.text)
 
     await FSMUserSurvey.next()
 
     await message.reply(texts.sm_user_subgroup_code)
 
 
+# Get user subgroup code:
 async def sm_subgroup_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['user_subgroup_code'] = message.text
+        data['subgroup_code'] = int(message.text)
 
     await FSMUserSurvey.next()
 
     await message.reply(texts.sm_user_group_leader)
 
 
-async def sm_user_is_leader(message: types.Message, state:FSMContext):
+# Get user status in group:
+async def sm_is_leader(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['user_group_leader'] = message.text
+        data['is_leader'] = str(message.text)
 
     await FSMUserSurvey.next()
 
-    # await message.reply(texts.sm_everything_is_correct)
-    data_parsed = f"Группа: {data['user_group_code']}\n" \
-                  f"Подгруппа: {data['user_subgroup_code']}\n" \
-                  f"Являешься старостой: {data['user_group_leader']}"
+    data_parsed = f"Группа: {data['group_name']}\n" \
+                  f"Подгруппа: {data['subgroup_code']}\n" \
+                  f"Являешься старостой: {data['is_leader']}\n" \
 
     message_check = f"{texts.sm_everything_is_correct}\n{data_parsed}"
-
     await dp.bot.send_message(message.from_user.id, message_check)
 
 
-async def sm_everything_is_correct(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['all_correct'] = message.text
-
+# Validate typed data:
+async def sm_set_registration_stamp(message: types.Message, state: FSMContext):
     if message.text == "Да":
+        async with state.proxy() as data:
+            timestamp = datetime.datetime.now().isoformat()
+            data['registration_stamp'] = timestamp
+
         await message.reply(texts.sm_we_got_it)
 
-        async with state.proxy() as data:
-            # TODO: database saver here.
-            pass
+        request = 'INSERT INTO users (user_id, group_name, subgroup_code, is_leader, registration_stamp) ' \
+                  'VALUES (%d, %s, %d, %s, %r)' % tuple(data.values())
 
-        data_parsed = f"Group: {data['user_group_code']}, subgroup: {data['user_subgroup_code']}, " \
-                      f"leader: {data['user_group_leader']}"
+        await postgre.execute_write_query('users', tuple(data.values()), 'user_id, group_name, subgroup_code, is_leader, registration_stamp')
 
-        logger.warning(f'User {message.from_user.id} (@{message.from_user.username}) '
-                       f'uploaded the following information: {data_parsed}')
+        data_parsed = f"group_name: {data['group_name']}, subgroup_code: {data['subgroup_code']}, " \
+                      f"is_leader: {data['is_leader']}"
+
+        logger.info(f"User {message.from_user.id} (@{message.from_user.username}) "
+                    f"uploaded the following information: {data_parsed}")
 
         await state.finish()
     else:
         await message.reply("Заполняем заново...")
 
 
-@dp.message_handler(state="*", commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state="*")
-async def cancel_user_survey(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    if current_state is None:
-        return
-    await state.finish()
-    await message.reply('Done')
-
-
 def register_handlers_sm_user(dp: Dispatcher):
     dp.register_message_handler(sm_start, commands=['survey'], state=None)
 
-    dp.register_message_handler(cancel_user_survey, state="*", commands='cancel')
-    dp.register_message_handler(cancel_user_survey, Text(equals='cancel', ignore_case=True), state="*")
+    dp.register_message_handler(cancel_user_survey, state="*", commands='cancel_survey')
+    dp.register_message_handler(cancel_user_survey, Text(equals='cancel_survey', ignore_case=True), state="*")
 
-    dp.register_message_handler(sm_group_code, state=FSMUserSurvey.user_group_code)
-    dp.register_message_handler(sm_subgroup_code, state=FSMUserSurvey.user_subgroup_code)
-    dp.register_message_handler(sm_user_is_leader, state=FSMUserSurvey.user_group_leader)
-    dp.register_message_handler(sm_everything_is_correct, state=FSMUserSurvey.all_correct)
+    dp.register_message_handler(sm_group_name, state=FSMUserSurvey.group_name)
+    dp.register_message_handler(sm_subgroup_code, state=FSMUserSurvey.subgroup_code)
+    dp.register_message_handler(sm_is_leader, state=FSMUserSurvey.is_leader)
+    dp.register_message_handler(sm_set_registration_stamp, state=FSMUserSurvey.registration_stamp)
 
     logger.debug("State machine registered!")
 
