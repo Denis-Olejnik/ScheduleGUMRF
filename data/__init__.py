@@ -1,2 +1,3 @@
 from data import config
-from data import texts
+from data.texts import *
+

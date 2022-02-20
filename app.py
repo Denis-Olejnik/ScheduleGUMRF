@@ -2,14 +2,18 @@ from aiogram import executor
 
 from data import config
 from database import postgre
-from handlers import base, user_survey
+from handlers import commands, user_survey
 from loader import dp, bot
 
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
 
-base.register_handlers_base(dp)
+commands.register_handlers_base(dp)
 user_survey.register_handlers_sm_user(dp)
+# schedule.register_callback_query_handler(dp)
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def on_startup(dispatcher):
@@ -28,7 +32,7 @@ async def on_shutdown(dispatcher):
 
 if __name__ == "__main__":
     if config.RUN_LOCAL:
-        executor.start_polling(dispatcher=dp, on_startup=on_startup)
+        executor.start_polling(dispatcher=dp, on_startup=on_startup, skip_updates=True)
     else:
         executor.start_webhook(dispatcher=dp,
                                webhook_path="",
