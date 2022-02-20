@@ -113,7 +113,7 @@ async def execute_write_query_state(state):
         db_connection.commit()
 
 
-async def has_user_registered(user_id: int) -> bool:
+async def is_user_registered(user_id: int) -> bool:
     """
     Is the user registered in the 'users' database?.
 

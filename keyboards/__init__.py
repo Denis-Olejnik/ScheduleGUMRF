@@ -1,2 +1,2 @@
-from keyboards.user_keyboard import user_inline_keyboard
-from keyboards.survey_keyboard import keyboard_subgroup_code, keyboard_group_leader, keyboard_results
+from keyboards.user_keyboard import KEYB_SCHEDULE
+from keyboards.survey_keyboard import kb_start_user_survey, kb_survey_group, kb_survey_subgroup, kb_survey_correct
