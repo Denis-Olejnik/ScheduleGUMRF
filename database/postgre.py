@@ -1,5 +1,4 @@
-import random
-import secrets
+import time
 
 import psycopg2 as ps
 from loguru import logger
@@ -27,6 +26,7 @@ async def create_connection(host: str = None,
     :param database_uri: URI Identifier
     :param sslmode: Is a secure connection required?
     """
+    start_time = time.time()
     global db_connection, cursor
 
     _host = host or POSTGRES_HOST
@@ -46,8 +46,9 @@ async def create_connection(host: str = None,
             sslmode=sslmode
         )
         cursor = db_connection.cursor()
+        execute_time = time.time() - start_time
+        logger.info(f"Connection to PostgreSQL is successful! (in {str(execute_time)[:5]} sec)")
 
-        logger.info("Connection to PostgreSQL is successful!")
     except (Exception, ps.OperationalError) as error:
         logger.exception(f"An error occurred: {error}")
 
@@ -58,13 +59,14 @@ async def execute_read_query(query: str = None):
     :param query: Request text
     :return: list of tuples [(line1, line2), (line1, line2)]
     """
-
+    start_time = time.time()
     try:
         logger.debug(f"Try to execute query: \"{query}\"")
         cursor.execute(query)
         result = cursor.fetchall()
 
-        logger.info(f'Read-request "{query}" completed successfully!')
+        execute_time = time.time() - start_time
+        logger.info(f'Read-request "{query}" completed successfully! (in {str(execute_time)[:5]} sec)')
         logger.debug(f"Total rows count = {cursor.rowcount}")
 
         return result
@@ -88,6 +90,7 @@ async def execute_write_query(table: str = None,
         Example of right request:
     "INSERT INTO users (user_id, data_1, ..., ) VALUES ('01234', 'some_data_1', ...,)"
     """
+    start_time = time.time()
     try:
         if not query:
             if isinstance(data, tuple):
@@ -99,7 +102,8 @@ async def execute_write_query(table: str = None,
         cursor.execute(query, data)
         db_connection.commit()
 
-        logger.info(f'Write-request "{query}" completed successfully!')
+        execute_time = time.time() - start_time
+        logger.info(f'Write-request "{query}" completed successfully! (in {str(execute_time)[:5]} sec)')
         return True
     except (Exception, ps.OperationalError) as error:
         logger.error(error)
@@ -128,6 +132,22 @@ async def is_user_registered(user_id: int) -> bool:
     except (Exception, ps.OperationalError, ps.DataError) as error:
         logger.exception(error)
         return False
+
+
+async def get_groups() -> str:
+    start_time = time.time()
+    try:
+        query = "SELECT DISTINCT group_code FROM schedule;"
+
+        cursor.execute(query)
+        result = cursor.fetchall()
+        print(result)
+        print(type(result))
+        execute_time = time.time() - start_time
+        logger.debug(f"Read request \"{query}\" completed successfully! (in {str(execute_time)[:5]} sec)")
+        return result
+    except (ps.OperationalError, ps.DataError) as error:
+        logger.exception(error)
 
 
 async def get_user_schedule_for_day(user_group: str, week_day: str | int, fractional: int):

@@ -32,7 +32,7 @@ async def on_shutdown(dispatcher):
 
 if __name__ == "__main__":
     if config.RUN_LOCAL:
-        executor.start_polling(dispatcher=dp, on_startup=on_startup, skip_updates=True)
+        executor.start_polling(dispatcher=dp, on_startup=on_startup,)
     else:
         executor.start_webhook(dispatcher=dp,
                                webhook_path="",

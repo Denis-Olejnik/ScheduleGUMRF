@@ -1,3 +1,4 @@
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
 from aiogram.utils.exceptions import Unauthorized, BadRequest
@@ -12,16 +13,19 @@ from database import postgre
 from keyboards.survey_keyboard import survey_cb, kb_survey_group
 from loader import dp
 
+available_groups = None
 
 class FSMUserSurvey(StatesGroup):
     user_id = State()
+
     group_name = State()
     subgroup_code = State()
 
     registration_stamp = State()
 
 
-async def sm_start(query: types.CallbackQuery):
+async def sm_start(query: types.CallbackQuery, callback_data: dict):
+
     try:
         user_id = query.from_user.id
         username = query.from_user.username
@@ -39,21 +43,57 @@ async def sm_start(query: types.CallbackQuery):
 
         logger.info(f"User @{username} [{user_id}] started the survey.")
 
-        await dp.bot.send_message(chat_id=user_id, text=TEXT_SM_WELCOME_MSG)
+        await dp.bot.send_message(chat_id=user_id, text=TEXT_SM_WELCOME_MSG)  # SURVEY STARTED...
 
-        
-        # # Get user_id and write it state:
-        # await FSMUserSurvey.user_id.set()
-        # write_id_state = dp.get_current().current_state()
-        # await write_id_state.update_data(user_id=user_id)
-        #
-        # # Set state to record a user group:
-        # await FSMUserSurvey.group_name.set()
+        await FSMUserSurvey.user_id.set()
+        save_state = dp.get_current().current_state()
+        await save_state.update_data(user_id=user_id)
 
-        await dp.bot.send_message(chat_id=user_id, text=TEXT_SM_USER_GROUP_NAME, reply_markup=kb_survey_group)
+        await FSMUserSurvey.group_name.set()
+
+        await dp.bot.send_message(chat_id=user_id, text=TEXT_SM_USER_GROUP_NAME)  # USER GROUP NAME
+
+        available_groups = await postgre.get_groups()
+        await dp.bot.send_message(chat_id=user_id, text=f"Available groups: {available_groups}")
 
     except (BadRequest, Unauthorized) as aiogram_error:
         logger.exception(aiogram_error)
+
+
+async def sm_group_name(message: types.Message, state: FSMContext):
+    if message.text != "IS_31_1":
+        await message.reply("WRONG GROUP (IS_31_1)")
+    else:
+        await message.reply("GOOD")
+        async with state.proxy() as data:
+            data["group_name"] = message.text
+
+
+def register_handlers_sm_user(dp: Dispatcher):
+    dp.register_callback_query_handler(sm_start, survey_cb.filter(field="StartUserSurvey"))
+    dp.register_message_handler(sm_group_name, state=FSMUserSurvey.group_name)
+
+#
+# def register_handlers_sm_user(dp: Dispatcher):
+#     dp.register_callback_query_handler(sm_start, survey_cb.filter(field="StartUserSurvey"))
+#     dp.register_callback_query_handler(sm_group_name, state=FSMUserSurvey.group_name)
+#     # dp.register_callback_query_handler(sm_group_name_check, lambda message:)
+
+
+
+
+
+    logger.debug("State machine registered!")
+
+
+# TODO: Добавить клавиатуру для выбора варианта ответа (Подгруппа: 1 / 2)
+#  TOOD: Проверять корректность названия группы
+#  TODO: Сделать запись в БД
+#  TODO: Если что-то заполнено неправильно, то следует дать возможность исправить (или начать сначала)
+#  TODO: Отлавливать сторонние команды ('/start')
+
+
+
 
 #
 # async def cancel_user_survey(message: types.Message, state: FSMContext):
@@ -65,8 +105,6 @@ async def sm_start(query: types.CallbackQuery):
 #
 
 
-async def sm_group_name(query: types.CallbackQuery, callback_data: dict):
-    await dp.bot.send_message(chat_id=query.from_user.id, text=f"{callback_data}")
     # try:
     #     user_id = query.from_user.id
     #     logger.info(callback_data)
@@ -84,8 +122,6 @@ async def sm_group_name(query: types.CallbackQuery, callback_data: dict):
     #
     # except Exception:
     #     logger.error('12')
-
-
 # Get user subgroup code:
 # async def sm_subgroup_code(query: types.CallbackQuery, callback_data: dict):
 #     logger.info("WRITE subgroup_code")
@@ -151,21 +187,13 @@ async def sm_group_name(query: types.CallbackQuery, callback_data: dict):
 #     #     await message.reply("Заполняем заново...")
 
 
-def register_handlers_sm_user(dp: Dispatcher):
-    dp.register_callback_query_handler(sm_start, survey_cb.filter(field="StartUserSurvey"), state=None)
-    dp.register_callback_query_handler(sm_group_name, survey_cb.filter(field="SurveyGroupName"), state=None)
+
+
+
+
     # dp.register_callback_query_handler(sm_subgroup_code, survey_cb.filter(field="UserSurveySubgroup"), state=None)
 
     # dp.register_message_handler(cancel_user_survey, state="*", commands='cancel_survey')
     # dp.register_message_handler(cancel_user_survey, Text(equals='cancel_survey', ignore_case=True), state="*")
 
     # dp.register_message_handler(sm_set_registration_stamp, state=FSMUserSurvey.registration_stamp)
-
-    logger.debug("State machine registered!")
-
-
-# TODO: Добавить клавиатуру для выбора варианта ответа (Подгруппа: 1 / 2)
-#  TOOD: Проверять корректность названия группы
-#  TODO: Сделать запись в БД
-#  TODO: Если что-то заполнено неправильно, то следует дать возможность исправить (или начать сначала)
-#  TODO: Отлавливать сторонние команды ('/start')
