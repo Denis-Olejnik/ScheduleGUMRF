@@ -134,18 +134,40 @@ async def is_user_registered(user_id: int) -> bool:
         return False
 
 
-async def get_groups() -> str:
+async def get_groups(convert_to_str: bool = True):
     start_time = time.time()
     try:
         query = "SELECT DISTINCT group_code FROM schedule;"
 
         cursor.execute(query)
-        result = cursor.fetchall()
-        print(result)
-        print(type(result))
+        user_groups_requested = cursor.fetchall()
+
+        group_list = list()
+        str_groups = str()
+
+        # replace '_' with '-' and add it to list
+        for item in user_groups_requested:
+            group = item[0].split("_")
+            group = group[0] + '-' + group[1]
+            group_list.append(group)
+
+            # Leave only unique values and sort alphabetically.
+        else:
+            group_list = list(set(group_list))
+            group_list = sorted(group_list)
+
+            # Prepare list items to print.
+            if convert_to_str:
+                for item in group_list:
+                    str_groups += f"{item} "
+
         execute_time = time.time() - start_time
         logger.debug(f"Read request \"{query}\" completed successfully! (in {str(execute_time)[:5]} sec)")
-        return result
+        print(str_groups)
+        if convert_to_str:
+            return str_groups
+        else:
+            return group_list
     except (ps.OperationalError, ps.DataError) as error:
         logger.exception(error)
 

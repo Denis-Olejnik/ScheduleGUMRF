@@ -14,7 +14,7 @@ async def cmd_start(message: types.Message):
         BOT_IN_DEV_TEXT = f"""
 BOT is in development mode. 
 Your uid ({user_id}) is not found in the allowed list. 
-Please contact admin to add it: @RUUUUUUUUUUUUUUUUUUR
+Please contact admin to add it: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR
         """
         await message.reply(BOT_IN_DEV_TEXT)
 

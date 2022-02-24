@@ -3,24 +3,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # START USER SURVEY:
 from aiogram.utils.callback_data import CallbackData
-#
-# # btn_start_user_survey = InlineKeyboardButton("Пройти опрос", callback_data="start_user_survey")
-# #
-# # keyboard_start_survey = InlineKeyboardMarkup().add(btn_start_user_survey)
-#
-# # SUB GROUP CODE:
-# btn_subgroup_code_first = InlineKeyboardButton("Первая", callback_data="user_subgroup_1")
-# btn_subgroup_code_second = InlineKeyboardButton("Вторая", callback_data="user_subgroup_2")
-#
-# keyboard_subgroup_code = InlineKeyboardMarkup().add(btn_subgroup_code_first, btn_subgroup_code_second)
-#
-#
-# # ALL IS CORRECT:
-# btn_all_correct = InlineKeyboardButton("Всё верно", callback_data="survey_results_correct")
-# btn_reset = InlineKeyboardButton("Исправить", callback_data="reset_survey_results")
-#
-# keyboard_results = InlineKeyboardMarkup().add(btn_all_correct, btn_reset)
-
 
 survey_cb = CallbackData('survey', 'field', 'value')
 
@@ -41,5 +23,5 @@ kb_survey_subgroup = InlineKeyboardMarkup().row(btn_survey_subgroup_one, btn_sur
 
 # CONFIRMATION:
 btn_survey_correct_true = InlineKeyboardButton("True", callback_data=survey_cb.new(field="SurveyCorrect", value="True"))
-btn_survey_correct_false = InlineKeyboardButton("False", callback_data=survey_cb.new(field="SurveyCorrect", value="False"))
+btn_survey_correct_false = InlineKeyboardButton("False", callback_data=survey_cb.new(field="SurveyIncorrect", value="False"))
 kb_survey_correct = InlineKeyboardMarkup().row(btn_survey_correct_true, btn_survey_correct_false)

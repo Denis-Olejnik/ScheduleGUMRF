@@ -1,14 +1,14 @@
 # Commands:
 # '/start'
-TEXT_ON_START_COMMAND = "ON START COMMAND"
+TEXT_ON_START_COMMAND = "-уведомление при запуске-"
 
 # Data base:
-TEXT_USER_NOT_FOUND_IN_DB = "USER NOT FOUND IN DB"
+TEXT_USER_NOT_FOUND_IN_DB = "Пользователь не найден в базе данных!"
 
 # State machine:
-TEXT_SM_WELCOME_MSG = "SURVEY STARTED MESSAGE"
-TEXT_SM_USER_GROUP_NAME = "USER GROUP NAME"
-TEXT_SM_USER_SUBGROUP_CODE = "USER SUBGROUP NAME"
+TEXT_SM_WELCOME_MSG = "Опрос запущен"
+TEXT_SM_USER_GROUP_NAME = "Введите название группы"
+TEXT_SM_USER_SUBGROUP_CODE = "Введите код подгруппы"
 # TEXT_SM_USER_IS_LEADER = "Предпоследний вопрос: ты староста группы?"
-TEXT_SM_DATA_VALIDATION = "DATA VALIDATION"
+TEXT_SM_DATA_VALIDATION = "Проверка введённых данных"
 TEXT_SM_WE_GOT_IT = "ALL DONE"
