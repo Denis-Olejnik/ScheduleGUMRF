@@ -7,7 +7,7 @@ from aiogram.utils.callback_data import CallbackData
 survey_cb = CallbackData('survey', 'field', 'value')
 
 # START USER SURVEY:
-btn_start_user_survey = InlineKeyboardButton("START SURVEY", callback_data=survey_cb.new(field="StartUserSurvey", value="True"))
+btn_start_user_survey = InlineKeyboardButton("Пройти опрос", callback_data=survey_cb.new(field="StartUserSurvey", value="True"))
 kb_start_user_survey = InlineKeyboardMarkup().add(btn_start_user_survey)
 
 # GROUP:

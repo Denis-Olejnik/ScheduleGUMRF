@@ -3,6 +3,7 @@ from datetime import datetime
 from aiogram.utils.exceptions import Unauthorized, BadRequest
 from loguru import logger
 
+from data import texts
 from database import postgre
 
 
@@ -25,6 +26,8 @@ async def is_numerator() -> bool:
     else:
         return False
 
+async def get_remaining_lec_time(lecture_num, lec_time, current_time) -> str:
+    return '123'
 
 async def format_schedule_time(schedule: tuple = None):
     """
@@ -33,7 +36,7 @@ async def format_schedule_time(schedule: tuple = None):
     """
     lines = schedule[0].split('\n')
     schedule_dict = dict()
-    resutl = str()
+    result = str()
 
     lec_time = {
         'lecture_1': {'start': '09:30', 'end': '11:05'},
@@ -43,11 +46,8 @@ async def format_schedule_time(schedule: tuple = None):
     }
 
     current_time = datetime.now().strftime("%H:%M")
-    # current_time = "11:15"
-    # TODO: Выводить остаточное время до конца пары,
-    # TODO: Выводить сообщение, если на сегодня расписание не найдено (отсутствует).
 
-    # Transformation from str to dictionary:
+    # Transformation from str to dictionary and format text:
     for index, line in enumerate(lines, 1):
         schedule_dict[f"lecture_{index}"] = line
 
@@ -58,29 +58,34 @@ async def format_schedule_time(schedule: tuple = None):
             schedule_dict[f"lecture_{index}"] = f"<b>>> {line}</b>"
 
         _lec_index = f"lecture_{index}"
-        resutl += f"{schedule_dict[_lec_index]}\n"
+        result += f"{schedule_dict[_lec_index]}\n"
+    else:
+        # result += await get_remaining_lec_time()
+        pass
+    return result
 
-    return resutl
 
-
-async def get_user_schedule_today(group_code: str, week_day: int):
+async def get_user_schedule_today(group_code: str, week_day: int = None) -> tuple[bool, str]:
     """
     Runs a query to the database and gets the full schedule for today for the specified group.
     :param group_code: User's group membership
     :param week_day: The current day of the week, where Monday = 1
     :return:
     """
-
+    day_of_week = week_day or '1'
     try:
         if await is_numerator():
-            query = f"SELECT schedule_numerator FROM schedule WHERE group_code='{group_code}' and week_day='{week_day}'"
+            query = f"SELECT schedule_numerator FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
         else:
-            query = f"SELECT schedule_denominator FROM schedule WHERE group_code='{group_code}' and week_day='{week_day}'"
+            query = f"SELECT schedule_denominator FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
 
         schedule = await postgre.execute_read_query(query)
-        schedule_formatted = await format_schedule_time(schedule[0])
-
-        return schedule_formatted
+        if len(schedule) > 0:
+            schedule_formatted = await format_schedule_time(schedule[0])
+            return True, schedule_formatted
+        else:
+            schedule_formatted = texts.TEXT_TODAY_SCHEDULE_NOT_FOUND
+            return False, schedule_formatted
 
     except (postgre.ps.OperationalError, postgre.ps.DataError) as database_error:
         logger.exception(database_error)

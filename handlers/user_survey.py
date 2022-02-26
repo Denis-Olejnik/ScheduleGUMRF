@@ -54,7 +54,7 @@ async def sm_start(query: types.CallbackQuery, callback_data: dict):
         await save_state.update_data(user_id=user_id)
 
         await FSMUserSurvey.username.set()
-        await dp.bot.send_message(chat_id=user_id, text="Привет! Как тебя зовут?")
+        await dp.bot.send_message(chat_id=user_id, text="Привет\! Как тебя зовут\?")
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
@@ -76,7 +76,7 @@ async def sm_user_name(message: types.Message, state: FSMContext):
 
         available_groups = await postgre.get_groups(convert_to_str=True)
         await dp.bot.send_message(chat_id=user_id, text=TEXT_SM_USER_GROUP_NAME)  # USER GROUP NAME
-        await dp.bot.send_message(chat_id=user_id, text=f"Доступные группы: {available_groups}")
+        await dp.bot.send_message(chat_id=user_id, text=f"Доступные группы: {available_groups}", parse_mode=types.ParseMode.HTML)
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
@@ -98,7 +98,7 @@ async def sm_group_name(message: types.Message, state: FSMContext):
             await FSMUserSurvey.subgroup_code.set()
             await message.reply(TEXT_SM_USER_SUBGROUP_CODE)
         else:
-            await message.reply("Группа не найдена в базе данных! Выберите из списка доступных групп.")
+            await message.reply("Группа не найдена в базе данных\! Выберите из списка доступных групп.")
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
@@ -114,11 +114,11 @@ async def sm_subgroup_code(message: types.message, state: FSMContext):
             async with state.proxy() as data:
                 data["subgroup_code"] = str(message.text)
 
-            await dp.bot.send_message(chat_id=message.from_user.id, text="SET reminder time [xx:xx]")
+            await dp.bot.send_message(chat_id=message.from_user.id, text="Пожалуйста, укажите за сколько минут до начала пары отравлять уведомление:")
             await FSMUserSurvey.reminder_time.set()
 
         else:
-            await message.reply("Введите корректный код подгруппы!")
+            await message.reply("Введите корректный код подгруппы\!")
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
@@ -139,9 +139,9 @@ async def sm_reminder_time(message: types.message, state:FSMContext):
                f"group_name: {user_data['group_name']}\n" \
                f"subgroup_code: {user_data['subgroup_code']}\n" \
                f"reminder_time: {user_data['reminder_time']}"
-        await message.answer(TEXT)
+        await message.answer(TEXT, parse_mode=types.ParseMode.HTML)
 
-        await message.answer("Данные записаны верно?", reply_markup=kb_survey_correct)
+        await message.answer("Данные записаны верно\?", reply_markup=kb_survey_correct)
 
         await FSMUserSurvey.registration_stamp.set()
 
@@ -169,7 +169,7 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
             if DEBUG_MODE:
                 logger.warning(f"DEBUG_MODE is {DEBUG_MODE}. The data will not be sent!")
                 await dp.bot.send_message(chat_id=query.from_user.id, text=f"DEBUG_MODE is {DEBUG_MODE}. "
-                                                                           f"The data will not be sent!")
+                                                                           f"The data will not be sent\!")
             else:
                 state_data = await state.get_data()
                 if await postgre.execute_write_query('users',
@@ -190,7 +190,7 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
 
 
 async def sm_restart_reg(query: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    await dp.bot.send_message(chat_id=query.from_user.id, text="Регистрация перезапускается..")
+    await dp.bot.send_message(chat_id=query.from_user.id, text="Регистрация перезапускается..", parse_mode=types.ParseMode.HTML )
     await state.finish()
     await FSMUserSurvey.user_id.set()
 

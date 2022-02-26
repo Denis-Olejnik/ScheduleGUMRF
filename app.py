@@ -10,17 +10,15 @@ from utils.set_bot_commands import set_default_commands
 
 commands.register_handlers_base(dp)
 user_survey.register_handlers_sm_user(dp)
-# schedule.register_callback_query_handler(dp)
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
 
 
 async def on_startup(dispatcher):
     await set_default_commands(dispatcher)
     await on_startup_notify(dispatcher)
     await postgre.create_connection()
-
     if not config.RUN_LOCAL:
         await bot.set_webhook(config.POSTGRES_URI)
 
@@ -32,7 +30,7 @@ async def on_shutdown(dispatcher):
 
 if __name__ == "__main__":
     if config.RUN_LOCAL:
-        executor.start_polling(dispatcher=dp, on_startup=on_startup,)
+        executor.start_polling(dispatcher=dp, on_startup=on_startup)
     else:
         executor.start_webhook(dispatcher=dp,
                                webhook_path="",
