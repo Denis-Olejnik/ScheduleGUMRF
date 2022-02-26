@@ -3,7 +3,7 @@ import time
 import psycopg2 as ps
 from loguru import logger
 
-from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_URI
+from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL
 
 global db_connection, cursor
 
@@ -34,7 +34,7 @@ async def create_connection(host: str = None,
     _db_name = db_name or POSTGRES_DB
     _username = username or POSTGRES_USER
     _password = password or POSTGRES_PASSWORD
-    _db_uri = database_uri or POSTGRES_URI
+    _db_uri = database_uri or DATABASE_URL
 
     try:
         db_connection = ps.connect(
