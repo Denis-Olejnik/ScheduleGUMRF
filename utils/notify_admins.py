@@ -7,7 +7,7 @@ from data.config import TELEGRAM_ADMINS
 async def on_startup_notify(dp: Dispatcher):
     for admin in TELEGRAM_ADMINS:
         try:
-            await dp.bot.send_message(admin, "Бот запущен!")
+            await dp.bot.send_message(admin, "Бот запущен\!")
             logger.info(f"Admin {admin} received a notification!!")
 
         except Exception as error:

@@ -4,7 +4,7 @@ from aiogram.dispatcher import Dispatcher
 
 from data import config
 
-bot = Bot(token=config.TELEGRAM_TOKEN, parse_mode=types.ParseMode.HTML)
+bot = Bot(token=config.TELEGRAM_TOKEN, parse_mode=types.ParseMode.MARKDOWN_V2)
 storage = MemoryStorage()
 
 dp = Dispatcher(bot, storage=storage)

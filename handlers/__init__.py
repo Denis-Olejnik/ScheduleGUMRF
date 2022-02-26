@@ -1,4 +1,3 @@
 from handlers import commands
-from handlers import user_menu
 from handlers import user_survey
-from handlers import schedule
+from handlers import schedule_sender

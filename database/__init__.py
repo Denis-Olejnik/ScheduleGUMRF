@@ -1,1 +1,1 @@
-from database import postgre
+from database import postgre, get_schedule
