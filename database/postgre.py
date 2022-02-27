@@ -11,7 +11,7 @@ async def create_connection(host: str = None,
                             db_name: str = None,
                             username: str = None,
                             password: str = None,
-                            database_uri: str = None,
+                            database_url: str = None,
                             sslmode: str = 'require'):
     """
     This function creates connection to database.
@@ -21,7 +21,7 @@ async def create_connection(host: str = None,
     :param db_name: Database name,
     :param username: Username of database,
     :param password: User password
-    :param database_uri: URI Identifier
+    :param database_url: URI Identifier
     :param sslmode: Is a secure connection required?
     """
     start_time = time.time()
@@ -33,17 +33,20 @@ async def create_connection(host: str = None,
     _db_name = db_name or POSTGRES_DB
     _username = username or POSTGRES_USER
     _password = password or POSTGRES_PASSWORD
-    _db_uri = database_uri or DATABASE_URL
+    _db_url = database_url or DATABASE_URL
 
     try:
-        db_connection = ps.connect(
-            host=_host,
-            port=_port,
-            database=_db_name,
-            user=_username,
-            password=_password,
-            sslmode=sslmode
-        )
+        if _db_url:
+            db_connection = ps.connect(_db_url)
+        else:
+            db_connection = ps.connect(
+                host=_host,
+                port=_port,
+                database=_db_name,
+                user=_username,
+                password=_password,
+                sslmode=sslmode
+            )
         cursor = db_connection.cursor()
         execute_time = time.time() - start_time
         logger.info(f"Connection to PostgreSQL is successful! (in {str(execute_time)[:5]} sec)")
