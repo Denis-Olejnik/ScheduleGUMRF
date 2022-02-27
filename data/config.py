@@ -1,13 +1,14 @@
 import os
-import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DEBUG_MODE = os.environ.get("DEBUG_MODE")
 RUN_LOCAL = os.environ.get("RUN_LOCAL")
 DONT_SAVE_TO_DB = os.environ.get("DONT_SAVE_TO_DB")
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_ADMINS = json.loads(str(os.environ["TELEGRAM_ADMINS"]))
-# TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS")
+TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS")
 TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED")
 TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS")
 
