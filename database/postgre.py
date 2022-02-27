@@ -5,8 +5,6 @@ from loguru import logger
 
 from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL
 
-global db_connection, cursor
-
 
 async def create_connection(host: str = None,
                             port: str = None,
@@ -27,6 +25,7 @@ async def create_connection(host: str = None,
     :param sslmode: Is a secure connection required?
     """
     start_time = time.time()
+
     global db_connection, cursor
 
     _host = host or POSTGRES_HOST

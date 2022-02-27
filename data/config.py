@@ -1,22 +1,22 @@
-from environs import Env
-env = Env()
-env.read_env()
+import os
+import json
 
-DEBUG_MODE = env.bool("DEBUG_MODE")
-RUN_LOCAL = env.bool("RUN_LOCAL")
-DONT_SAVE_TO_DB = env.bool("DONT_SAVE_TO_DB")
+DEBUG_MODE = os.environ.get("DEBUG_MODE")
+RUN_LOCAL = os.environ.get("RUN_LOCAL")
+DONT_SAVE_TO_DB = os.environ.get("DONT_SAVE_TO_DB")
 
-TELEGRAM_TOKEN = env.str("TELEGRAM_TOKEN")
-TELEGRAM_ADMINS = env.list("TELEGRAM_ADMINS")
-TELEGRAM_ONLY_ALLOWED = env.bool("TELEGRAM_ONLY_ALLOWED")
-TELEGRAM_ALLOWED_USERS = env.list("TELEGRAM_ALLOWED_USERS")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_ADMINS = json.loads(str(os.environ["TELEGRAM_ADMINS"]))
+# TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS")
+TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED")
+TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS")
 
-WEBHOOK_PATH = env.str("WEBHOOK_PATH")
+WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH")
 
-POSTGRES_HOST = env.str("POSTGRES_HOST")
-POSTGRES_PORT = env.str("POSTGRES_PORT")
-POSTGRES_PASSWORD = env.str("POSTGRES_PASSWORD")
-POSTGRES_USER = env.str("POSTGRES_USER")
-POSTGRES_DB = env.str("POSTGRES_DB")
-DATABASE_URL = env.str("DATABASE_URL") or f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:" \
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST")
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+POSTGRES_USER = os.environ.get("POSTGRES_USER")
+POSTGRES_DB = os.environ.get("POSTGRES_DB")
+DATABASE_URL = os.environ.get("DATABASE_URL") or f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:" \
                                           f"{POSTGRES_PORT}/{POSTGRES_DB}"
