@@ -166,7 +166,7 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
             state_reg = dp.get_current().current_state()
             await state_reg.update_data(registration_stamp=registration_stamp)
 
-            if SAVE_TO_DB:
+            if not SAVE_TO_DB:
                 logger.warning(f"SAVE_TO_DB is True. The data will not be sent to DB!")
                 await dp.bot.send_message(chat_id=query.from_user.id, text=f"DEBUG_MODE is True\n"
                                                                            f"The data will not be sent!", parse_mode=types.ParseMode.HTML)
