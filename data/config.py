@@ -8,9 +8,9 @@ RUN_LOCAL = os.environ.get("RUN_LOCAL")
 DONT_SAVE_TO_DB = os.environ.get("DONT_SAVE_TO_DB")
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS")
+TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS").split(',')
 TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED")
-TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS")
+TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS").split(',')
 
 WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH")
 
