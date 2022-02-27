@@ -22,6 +22,6 @@ btn_survey_subgroup_two = InlineKeyboardButton("Second", callback_data=survey_cb
 kb_survey_subgroup = InlineKeyboardMarkup().row(btn_survey_subgroup_one, btn_survey_subgroup_two)
 
 # CONFIRMATION:
-btn_survey_correct_true = InlineKeyboardButton("True", callback_data=survey_cb.new(field="SurveyCorrect", value="True"))
-btn_survey_correct_false = InlineKeyboardButton("False", callback_data=survey_cb.new(field="SurveyIncorrect", value="False"))
+btn_survey_correct_true = InlineKeyboardButton("Всё верно", callback_data=survey_cb.new(field="SurveyCorrect", value="True"))
+btn_survey_correct_false = InlineKeyboardButton("Есть ошибка", callback_data=survey_cb.new(field="SurveyIncorrect", value="False"))
 kb_survey_correct = InlineKeyboardMarkup().row(btn_survey_correct_true, btn_survey_correct_false)

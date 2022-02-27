@@ -6,7 +6,7 @@ from aiogram.utils.exceptions import Unauthorized, BadRequest
 from loguru import logger
 
 from data import TEXT_SM_WELCOME_MSG, TEXT_SM_USER_GROUP_NAME, TEXT_SM_USER_SUBGROUP_CODE, texts
-from data.config import DEBUG_MODE, DONT_SAVE_TO_DB
+from data.config import DEBUG_MODE, SAVE_TO_DB
 from database import postgre
 
 from keyboards.survey_keyboard import survey_cb, kb_survey_correct
@@ -166,10 +166,10 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
             state_reg = dp.get_current().current_state()
             await state_reg.update_data(registration_stamp=registration_stamp)
 
-            if DONT_SAVE_TO_DB:
-                logger.warning(f"DONT_SAVE_TO_DB is True. The data will not be sent to DB!")
+            if SAVE_TO_DB:
+                logger.warning(f"SAVE_TO_DB is True. The data will not be sent to DB!")
                 await dp.bot.send_message(chat_id=query.from_user.id, text=f"DEBUG_MODE is True\n"
-                                                                           f"The data will not be sent\!")
+                                                                           f"The data will not be sent!", parse_mode=types.ParseMode.HTML)
             else:
                 state_data = await state.get_data()
                 if await postgre.execute_write_query('users',
@@ -178,7 +178,7 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
                                                      'reminder_time, registration_stamp'):
                     await dp.bot.send_message(chat_id=query.from_user.id, text=texts.TEXT_SM_WE_GOT_IT)
         else:
-            await dp.bot.send_message(chat_id=query.from_user.id, text="DATA IS INVALID. RESTART...")
+            await dp.bot.send_message(chat_id=query.from_user.id, text="DATA IS INVALID. RESTART...", parse_mode=types.ParseMode.HTML)
         await state.finish()
 
     except (BadRequest, Unauthorized) as aiogram_error:
