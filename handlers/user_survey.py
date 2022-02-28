@@ -1,4 +1,6 @@
 from datetime import datetime
+
+import pytz
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
@@ -161,7 +163,7 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
 
         if callback_data['value']:
 
-            registration_stamp = datetime.now().isoformat()
+            registration_stamp = datetime.now(pytz.timezone('Europe/Moscow')).isoformat()
 
             state_reg = dp.get_current().current_state()
             await state_reg.update_data(registration_stamp=registration_stamp)

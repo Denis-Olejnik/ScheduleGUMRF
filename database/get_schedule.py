@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from aiogram.utils.exceptions import Unauthorized, BadRequest
 from loguru import logger
 
@@ -45,7 +46,7 @@ async def format_schedule_time(schedule: tuple = None):
         'lecture_4': {'start': '15:20', 'end': '16:55'}
     }
 
-    current_time = datetime.now().strftime("%H:%M")
+    current_time = datetime.now(pytz.timezone('Europe/Moscow')).strftime("%H:%M")
 
     # Transformation from str to dictionary and format text:
     for index, line in enumerate(lines, 1):
