@@ -1,5 +1,3 @@
-from datetime import datetime, date
-
 from aiogram import Dispatcher, types
 from loguru import logger
 
@@ -15,7 +13,7 @@ async def cmd_start(message: types.Message):
     user_id = message.from_user.id
 
     if str(user_id) not in config.TELEGRAM_ALLOWED_USERS and config.TELEGRAM_ONLY_ALLOWED:
-        BOT_IN_DEV_TEXT = f"BOT is in development mode. \nYour uid \({user_id}\) is not found in the allowed list. \n" \
+        BOT_IN_DEV_TEXT = f"BOT is in development mode\. \nYour uid \({user_id}\) is not found in the allowed list\. \n" \
                           f"Please contact admin to add it: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR"
         await message.reply(BOT_IN_DEV_TEXT)
         return
