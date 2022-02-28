@@ -100,7 +100,6 @@ async def execute_write_query(table: str = None,
             else:
                 logger.warning(f"The type of 'data' ({type(data)}) is not a tuple! Request may contains an errors!")
                 query = f"INSERT INTO {table} ({columns}) VALUES ({data};)"
-
         cursor.execute(query, data)
         db_connection.commit()
 
@@ -114,7 +113,6 @@ async def execute_write_query(table: str = None,
 
 async def execute_write_query_state(state):
     async with state.proxy() as data:
-        print(tuple(data.values()))
         cursor.execute("INSERT INTO users VALUES %s)", tuple(data.values()))
         db_connection.commit()
 
@@ -165,7 +163,6 @@ async def get_groups(convert_to_str: bool = True):
 
         execute_time = time.time() - start_time
         logger.debug(f"Read request \"{query}\" completed successfully! (in {str(execute_time)[:5]} sec)")
-        print(str_groups)
         if convert_to_str:
             return str_groups
         else:

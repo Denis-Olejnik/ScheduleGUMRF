@@ -162,23 +162,30 @@ async def sm_registration_stamp(query: types.CallbackQuery, state: FSMContext, c
                                        message_id=query.message.message_id)
 
         if callback_data['value']:
+            try:
+                registration_stamp = datetime.now().isoformat()
 
-            registration_stamp = datetime.now(pytz.timezone('Europe/Moscow')).isoformat()
+                state_reg = dp.get_current().current_state()
+                await state_reg.update_data(registration_stamp=registration_stamp)
 
-            state_reg = dp.get_current().current_state()
-            await state_reg.update_data(registration_stamp=registration_stamp)
-
-            if not SAVE_TO_DB:
-                logger.warning(f"SAVE_TO_DB is True. The data will not be sent to DB!")
-                await dp.bot.send_message(chat_id=query.from_user.id, text=f"DEBUG_MODE is True\n"
-                                                                           f"The data will not be sent!", parse_mode=types.ParseMode.HTML)
-            else:
-                state_data = await state.get_data()
-                if await postgre.execute_write_query('users',
-                                                     tuple(state_data.values()),
-                                                     'user_id, username, group_name, subgroup_code, '
-                                                     'reminder_time, registration_stamp'):
-                    await dp.bot.send_message(chat_id=query.from_user.id, text=texts.TEXT_SM_WE_GOT_IT)
+                if not SAVE_TO_DB:
+                    logger.warning(f"SAVE_TO_DB is True. The data will not be sent to DB!")
+                    await dp.bot.send_message(chat_id=query.from_user.id, text=f"DEBUG_MODE is True\n"
+                                                                               f"The data will not be sent!", parse_mode=types.ParseMode.HTML)
+                else:
+                    state_data = await state.get_data()
+                    print(state_data)
+                    if await postgre.execute_write_query('users',
+                                                         tuple(state_data.values()),
+                                                         'user_id, username, group_name, subgroup_code, '
+                                                         'reminder_time, registration_stamp'):
+                        await dp.bot.send_message(chat_id=query.from_user.id, text=texts.TEXT_SM_WE_GOT_IT)
+            except (BadRequest, Unauthorized) as aiogram_error:
+                if DEBUG_MODE:
+                    await dp.bot.send_message(chat_id=query.from_user.id,
+                                              text=f"{aiogram_error}\n"
+                                                   f"Please contact the administrator: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR")
+                logger.exception(aiogram_error)
         else:
             await dp.bot.send_message(chat_id=query.from_user.id, text="DATA IS INVALID. RESTART...", parse_mode=types.ParseMode.HTML)
         await state.finish()

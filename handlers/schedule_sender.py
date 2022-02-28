@@ -26,8 +26,9 @@ async def show_schedule(message: types.Message):
 
             # if answer contains any data (first val of dict = True)
             if schedule[0]:
-                await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], parse_mode=types.ParseMode.HTML)
+                await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], reply_markup=kb_schedule, parse_mode=types.ParseMode.HTML)
             else:
+                # await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], parse_mode=types.ParseMode.HTML)
                 await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], reply_markup=kb_schedule, parse_mode=types.ParseMode.HTML)
 
         except postgre.ps.OperationalError as postgre_error:
