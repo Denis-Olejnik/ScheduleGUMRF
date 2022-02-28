@@ -27,8 +27,15 @@ async def is_numerator() -> bool:
     else:
         return False
 
-async def get_remaining_lec_time(lecture_num, lec_time, current_time) -> str:
-    return '123'
+
+async def get_remaining_lec_time(lecture, current_time) -> str:
+    lecture_end_in = datetime.strptime(lecture['end'], "%H:%M")
+    current_time = datetime.strptime(current_time, "%H:%M")
+
+    remaining_lec_time = lecture_end_in - current_time
+
+    return f'\n\nОсталось до конца: {remaining_lec_time}'
+
 
 async def format_schedule_time(schedule: tuple = None):
     """
@@ -52,17 +59,19 @@ async def format_schedule_time(schedule: tuple = None):
     for index, line in enumerate(lines, 1):
         schedule_dict[f"lecture_{index}"] = line
 
-        lec_start_time = lec_time[f"lecture_{index}"]['start']
-        lec_end_time = lec_time[f"lecture_{index}"]['end']
+        current_lec = lec_time[f"lecture_{index}"]
+        lec_start_time = current_lec['start']
+        lec_end_time = current_lec['end']
 
         if await time_in_range(lec_start_time, lec_end_time, current_time):
+
+            lec_remaining_time = await get_remaining_lec_time(current_lec, current_time)
             schedule_dict[f"lecture_{index}"] = f"<b>>> {line}</b>"
 
         _lec_index = f"lecture_{index}"
         result += f"{schedule_dict[_lec_index]}\n"
     else:
-        # result += await get_remaining_lec_time()
-        pass
+        result += lec_remaining_time
     return result
 
 

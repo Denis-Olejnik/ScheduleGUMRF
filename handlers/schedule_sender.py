@@ -4,6 +4,7 @@ from loguru import logger
 
 from data.config import DEBUG_MODE
 from database import postgre, get_schedule
+from keyboards import kb_schedule
 from loader import dp
 
 from aiogram import types
@@ -21,8 +22,13 @@ async def show_schedule(message: types.Message):
             user_group = f"{user_data[0][2]}_{user_data[0][3]}".replace('-', '_')
 
             schedule = await get_schedule.get_user_schedule_today(user_group, date.today().isoweekday())
-            
-            await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], parse_mode=types.ParseMode.HTML)
+            # schedule = await get_schedule.get_user_schedule_today(user_group, 7)
+
+            # if answer contains any data (first val of dict = True)
+            if schedule[0]:
+                await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], parse_mode=types.ParseMode.HTML)
+            else:
+                await dp.bot.send_message(chat_id=message.from_user.id, text=schedule[1], reply_markup=kb_schedule, parse_mode=types.ParseMode.HTML)
 
         except postgre.ps.OperationalError as postgre_error:
             await dp.bot.send_message(chat_id=user_id, text="Database error.")

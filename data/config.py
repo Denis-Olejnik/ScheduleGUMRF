@@ -3,14 +3,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG_MODE = os.environ.get("DEBUG_MODE")
-RUN_LOCAL = os.environ.get("RUN_LOCAL")
-SAVE_TO_DB = os.environ.get("SAVE_TO_DB")
+DEBUG_MODE = os.environ.get("DEBUG_MODE").lower() in ['true', 't', '+', '1']
+RUN_LOCAL = os.environ.get("RUN_LOCAL").lower() in ['true', 't', '+', '1']
+SAVE_TO_DB = os.environ.get("SAVE_TO_DB").lower() in ['true', 't', '+', '1']
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS").split(',')
-TELEGRAM_NOTIFY_ADMIN = os.environ.get("TELEGRAM_NOTIFY_ADMIN")
-TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED")
+TELEGRAM_NOTIFY_ADMIN = os.environ.get("TELEGRAM_NOTIFY_ADMIN").lower() in ['true', 't', '+', '1']
+TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED").lower() in ['true', 't', '+', '1']
 TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS").split(',')
 
 WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH")
