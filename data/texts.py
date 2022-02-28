@@ -1,7 +1,9 @@
 # Commands:
 # '/start'
 TEXT_ON_START_COMMAND = "Привет\nЯ помогу тебе следить за расписанием в твоей группе"
-
+TEXT_IN_DEV_MODE = "BOT is in *development mode*\." \
+                   "\n\nYour ID was not found in the list\." \
+                   "\nPlease contact admin to add it: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR\n\n"
 # Data base:
 TEXT_USER_NOT_FOUND_IN_DB = "Пользователь не найден в базе данных"
 

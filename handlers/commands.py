@@ -1,8 +1,9 @@
 from aiogram import Dispatcher, types
+from aiogram.utils.exceptions import BadRequest, Unauthorized
 from loguru import logger
 
 from data import texts, config
-from data.texts import TEXT_USER_NOT_FOUND_IN_DB
+from data.texts import TEXT_USER_NOT_FOUND_IN_DB, TEXT_IN_DEV_MODE
 from database import postgre
 from handlers.schedule_sender import show_schedule
 from keyboards import kb_start_user_survey
@@ -11,12 +12,14 @@ from loader import dp
 
 async def cmd_start(message: types.Message):
     user_id = message.from_user.id
+    try:
+        if str(user_id) not in config.TELEGRAM_ALLOWED_USERS and config.TELEGRAM_ONLY_ALLOWED:
+            await message.reply(text=TEXT_IN_DEV_MODE + f"ID: {user_id}")
+            logger.info(f"User {user_id} is not allowed.")
 
-    if str(user_id) not in config.TELEGRAM_ALLOWED_USERS and config.TELEGRAM_ONLY_ALLOWED:
-        BOT_IN_DEV_TEXT = f"BOT is in development mode\. \nYour uid \({user_id}\) is not found in the allowed list\. \n" \
-                          f"Please contact admin to add it: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR"
-        await message.reply(BOT_IN_DEV_TEXT)
-        return
+            return
+    except (BadRequest, Unauthorized) as aiogram_error:
+        logger.exception(aiogram_error)
 
     logger.info(f"User @{message.from_user.username} [{message.from_user.id}] start conversation with bot!")
 
