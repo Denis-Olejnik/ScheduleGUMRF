@@ -3,6 +3,7 @@ from aiogram import executor
 from data import config
 from database import postgre
 from handlers import commands, user_survey
+from handlers.schedule_sender import register_handlers_inline_keyb
 from loader import dp, bot
 
 from utils.notify_admins import on_startup_notify
@@ -10,6 +11,7 @@ from utils.set_bot_commands import set_default_commands
 
 commands.register_handlers_base(dp)
 user_survey.register_handlers_sm_user(dp)
+register_handlers_inline_keyb(dp)
 
 # import logging
 # logging.basicConfig(level=logging.DEBUG)
@@ -20,7 +22,7 @@ async def on_startup(dispatcher):
     await on_startup_notify(dispatcher)
     await postgre.create_connection()
     if not config.RUN_LOCAL:
-        await bot.set_webhook(config.POSTGRES_URI)
+        await bot.set_webhook(config.POSTGRES_URL)
 
 
 async def on_shutdown(dispatcher):
