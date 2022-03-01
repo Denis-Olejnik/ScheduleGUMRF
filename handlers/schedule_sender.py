@@ -49,7 +49,7 @@ async def show_schedule(message: types.Message):
 async def update_schedule_message(query: types.CallbackQuery, callback_data: dict):
     user_id = query.from_user.id
     message_id = query.message.message_id
-    last_edit = query.message.edit_date.time()
+    # last_edit = query.message.edit_date.time()
 
     user_group = str()
     try:
