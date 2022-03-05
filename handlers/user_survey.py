@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytz
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
@@ -69,11 +68,17 @@ async def sm_start(query: types.CallbackQuery, callback_data: dict):
 async def sm_user_name(message: types.Message, state: FSMContext):
     try:
         user_id = message.from_user.id
-        username = str(message.text)
+        username_source = str(message.text)
+        username = ""
+
+        # Remove non alpha chars from username:
+        for char in username_source:
+            if char.isalpha() or char.isdigit():
+                username += char
 
         async with state.proxy() as data:
             data["username"] = username
-
+        await message.answer(text=username)
         await FSMUserSurvey.group_name.set()
 
         available_groups = await postgre.get_groups(convert_to_str=True)
@@ -100,8 +105,9 @@ async def sm_group_name(message: types.Message, state: FSMContext):
             await FSMUserSurvey.subgroup_code.set()
             await message.reply(TEXT_SM_USER_SUBGROUP_CODE, reply_markup=kb_survey_subgroup)
         else:
-            group_not_found = """Группа не найдена в базе данных\!\nВыберите из списка доступных групп\.
-            Возможно, есть ошибка в вводе\."""
+            group_not_found = "Группа не найдена в базе данных\!" \
+                              "\nВыберите из списка доступных групп\." \
+                              "\nВозможно, есть ошибка в вводе\."
             await message.reply(group_not_found)
 
     except (BadRequest, Unauthorized) as aiogram_error:
@@ -112,7 +118,8 @@ async def sm_group_name(message: types.Message, state: FSMContext):
         logger.exception(aiogram_error)
 
 
-async def sm_subgroup_code(message: types.message, state: FSMContext, query: types.CallbackQuery, callback_data: dict):
+async def sm_subgroup_code(query: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    user_id = query.from_user.id
     try:
         # remove keyboard after click on it
         await dp.bot.edit_message_text(text=query.message.text, chat_id=query.from_user.id,
@@ -122,15 +129,15 @@ async def sm_subgroup_code(message: types.message, state: FSMContext, query: typ
             async with state.proxy() as data:
                 data["subgroup_code"] = callback_data['value']
 
-            await dp.bot.send_message(chat_id=message.from_user.id, text="Пожалуйста, укажите за сколько минут до начала пары отравлять уведомление:")
+            await dp.bot.send_message(chat_id=user_id, text="Пожалуйста, укажите за сколько минут до начала пары отравлять уведомление:")
             await FSMUserSurvey.reminder_time.set()
 
         else:
-            await message.reply("Введите корректный код подгруппы\!")
+            await dp.bot.send_message(chat_id=user_id, text="Некорректный ввод\!")
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
-            await dp.bot.send_message(chat_id=message.from_user.id,
+            await dp.bot.send_message(chat_id=user_id,
                                       text=f"{aiogram_error}\n"
                                            f"Please contact the administrator: @RUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR")
         logger.exception(aiogram_error)
@@ -216,7 +223,7 @@ def register_handlers_sm_user(dp: Dispatcher):
     dp.register_callback_query_handler(sm_start, survey_cb.filter(field="StartUserSurvey"))
     dp.register_message_handler(sm_user_name, state=FSMUserSurvey.username)
     dp.register_message_handler(sm_group_name, state=FSMUserSurvey.group_name)
-    dp.register_message_handler(sm_subgroup_code, survey_cb.filter(field="UserSurveySubgroup"), state=FSMUserSurvey.subgroup_code)
+    dp.register_callback_query_handler(sm_subgroup_code, survey_cb.filter(field="UserSurveySubgroup"), state=FSMUserSurvey.subgroup_code)
     dp.register_message_handler(sm_reminder_time, state=FSMUserSurvey.reminder_time)
     dp.register_callback_query_handler(sm_registration_stamp, survey_cb.filter(field="SurveyCorrect"), state=FSMUserSurvey.registration_stamp)
     dp.register_callback_query_handler(sm_restart_reg, survey_cb.filter(field="SurveyIncorrect"), state=FSMUserSurvey.registration_stamp)

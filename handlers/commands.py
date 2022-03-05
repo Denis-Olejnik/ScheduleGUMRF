@@ -26,9 +26,9 @@ async def cmd_start(message: types.Message):
     is_user_registered = await postgre.is_user_registered(message.from_user.id)
     if is_user_registered:
         await show_schedule(message)
-        await dp.bot.send_message(chat_id=user_id, text='Я отправил тебе меню\. Получил\?', reply_markup=USER_MENU)
+        # await dp.bot.send_message(chat_id=user_id, text='Я отправил тебе меню\. Получил\?', reply_markup=USER_MENU)
     else:
-        await message.answer(text=texts.TEXT_ON_START_COMMAND)
+        await message.answer(text=texts.TEXT_ON_START_COMMAND, reply_markup=types.ReplyKeyboardRemove())
         await dp.bot.send_message(chat_id=message.from_user.id, text=TEXT_USER_NOT_FOUND_IN_DB,
                                   reply_markup=kb_start_user_survey)
 
