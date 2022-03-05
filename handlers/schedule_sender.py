@@ -49,9 +49,8 @@ async def show_schedule(message: types.Message):
 async def update_schedule_message(query: types.CallbackQuery, callback_data: dict):
     user_id = query.from_user.id
     message_id = query.message.message_id
-    # last_edit = query.message.edit_date.time()
-
     user_group = str()
+
     try:
         # Get user group:
         user_data = await postgre.execute_read_query(f"SELECT * FROM users WHERE user_id='{user_id}'")

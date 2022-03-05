@@ -11,7 +11,7 @@ from data import TEXT_SM_WELCOME_MSG, TEXT_SM_USER_GROUP_NAME, TEXT_SM_USER_SUBG
 from data.config import DEBUG_MODE, SAVE_TO_DB
 from database import postgre
 
-from keyboards.survey_keyboard import survey_cb, kb_survey_correct
+from keyboards.survey_keyboard import survey_cb, kb_survey_correct, kb_survey_subgroup
 from loader import dp
 
 
@@ -98,9 +98,11 @@ async def sm_group_name(message: types.Message, state: FSMContext):
                 data["group_name"] = user_group
 
             await FSMUserSurvey.subgroup_code.set()
-            await message.reply(TEXT_SM_USER_SUBGROUP_CODE)
+            await message.reply(TEXT_SM_USER_SUBGROUP_CODE, reply_markup=kb_survey_subgroup)
         else:
-            await message.reply("Группа не найдена в базе данных\! Выберите из списка доступных групп.")
+            group_not_found = """Группа не найдена в базе данных\!\nВыберите из списка доступных групп\.
+            Возможно, есть ошибка в вводе\."""
+            await message.reply(group_not_found)
 
     except (BadRequest, Unauthorized) as aiogram_error:
         if DEBUG_MODE:
@@ -110,11 +112,15 @@ async def sm_group_name(message: types.Message, state: FSMContext):
         logger.exception(aiogram_error)
 
 
-async def sm_subgroup_code(message: types.message, state: FSMContext):
+async def sm_subgroup_code(message: types.message, state: FSMContext, query: types.CallbackQuery, callback_data: dict):
     try:
-        if str(message.text) in ['1', '2']:
+        # remove keyboard after click on it
+        await dp.bot.edit_message_text(text=query.message.text, chat_id=query.from_user.id,
+                                       message_id=query.message.message_id)
+
+        if callback_data['value']:
             async with state.proxy() as data:
-                data["subgroup_code"] = str(message.text)
+                data["subgroup_code"] = callback_data['value']
 
             await dp.bot.send_message(chat_id=message.from_user.id, text="Пожалуйста, укажите за сколько минут до начала пары отравлять уведомление:")
             await FSMUserSurvey.reminder_time.set()
@@ -210,7 +216,7 @@ def register_handlers_sm_user(dp: Dispatcher):
     dp.register_callback_query_handler(sm_start, survey_cb.filter(field="StartUserSurvey"))
     dp.register_message_handler(sm_user_name, state=FSMUserSurvey.username)
     dp.register_message_handler(sm_group_name, state=FSMUserSurvey.group_name)
-    dp.register_message_handler(sm_subgroup_code, state=FSMUserSurvey.subgroup_code)
+    dp.register_message_handler(sm_subgroup_code, survey_cb.filter(field="UserSurveySubgroup"), state=FSMUserSurvey.subgroup_code)
     dp.register_message_handler(sm_reminder_time, state=FSMUserSurvey.reminder_time)
     dp.register_callback_query_handler(sm_registration_stamp, survey_cb.filter(field="SurveyCorrect"), state=FSMUserSurvey.registration_stamp)
     dp.register_callback_query_handler(sm_restart_reg, survey_cb.filter(field="SurveyIncorrect"), state=FSMUserSurvey.registration_stamp)
