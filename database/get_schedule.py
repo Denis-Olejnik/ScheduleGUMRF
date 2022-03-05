@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from aiogram.utils.exceptions import Unauthorized, BadRequest
 from loguru import logger
 
@@ -26,8 +27,28 @@ async def is_numerator() -> bool:
     else:
         return False
 
-async def get_remaining_lec_time(lecture_num, lec_time, current_time) -> str:
-    return '123'
+
+async def get_hours_mins(time: datetime.time) -> dict:
+    hours = time.seconds // 3600
+    minutes = (time.seconds // 60) % 60
+    result = {"hours": hours, "mins": minutes}
+    return result
+
+
+async def get_remaining_time(lecture, current_time) -> str:
+    lecture_starts_in = datetime.strptime(lecture['start'], "%H:%M")
+    lecture_end_in = datetime.strptime(lecture['end'], "%H:%M")
+    current_time = datetime.strptime(current_time, "%H:%M")
+
+    if current_time < lecture_starts_in:
+        delta_time = lecture_starts_in - current_time
+        remaining_time = await get_hours_mins(delta_time)
+        return f"Начало пары через: {remaining_time.get('hours')} ч. {remaining_time.get('mins')} мин."
+    else:
+        delta_time = lecture_end_in - current_time
+        remaining_time = await get_hours_mins(delta_time)
+        return f"До конца пары осталось: {remaining_time.get('hours')} ч. {remaining_time.get('mins')} мин."
+
 
 async def format_schedule_time(schedule: tuple = None):
     """
@@ -37,6 +58,7 @@ async def format_schedule_time(schedule: tuple = None):
     lines = schedule[0].split('\n')
     schedule_dict = dict()
     result = str()
+    time_tmp = str()
 
     lec_time = {
         'lecture_1': {'start': '09:30', 'end': '11:05'},
@@ -45,23 +67,26 @@ async def format_schedule_time(schedule: tuple = None):
         'lecture_4': {'start': '15:20', 'end': '16:55'}
     }
 
-    current_time = datetime.now().strftime("%H:%M")
+    current_time = datetime.now(pytz.timezone('Europe/Moscow')).strftime("%H:%M")
+    # current_time = datetime.now(pytz.timezone('US/Alaska')).strftime("%H:%M")
 
     # Transformation from str to dictionary and format text:
     for index, line in enumerate(lines, 1):
         schedule_dict[f"lecture_{index}"] = line
 
-        lec_start_time = lec_time[f"lecture_{index}"]['start']
-        lec_end_time = lec_time[f"lecture_{index}"]['end']
+        lec_start_time = lec_time[f'lecture_{index}']['start']
+        lec_end_time = lec_time[f'lecture_{index}']['end']
 
         if await time_in_range(lec_start_time, lec_end_time, current_time):
+            current_lec = lec_time[f"lecture_{index}"]
+            # Outline current line:
             schedule_dict[f"lecture_{index}"] = f"<b>>> {line}</b>"
-
+            time_tmp = await get_remaining_time(current_lec, current_time)
         _lec_index = f"lecture_{index}"
         result += f"{schedule_dict[_lec_index]}\n"
     else:
-        # result += await get_remaining_lec_time()
-        pass
+        result += "\n" + time_tmp
+
     return result
 
 

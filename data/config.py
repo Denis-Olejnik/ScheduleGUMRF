@@ -1,22 +1,24 @@
-# This file contains global variables
-from environs import Env
-env = Env()
-env.read_env()
+import os
+from dotenv import load_dotenv
 
-DEBUG_MODE = env.bool("DEBUG_MODE")
-RUN_LOCAL = env.bool("RUN_LOCAL")
+load_dotenv()
 
-TELEGRAM_TOKEN = env.str("TELEGRAM_TOKEN")
-TELEGRAM_ADMINS = env.list("TELEGRAM_ADMINS")
-TELEGRAM_ONLY_ALLOWED = env.bool("TELEGRAM_ONLY_ALLOWED")
-TELEGRAM_ALLOWED_USERS = env.list("TELEGRAM_ALLOWED_USERS")
+DEBUG_MODE = os.environ.get("DEBUG_MODE").lower() in ['true', 't', '+', '1']
+RUN_LOCAL = os.environ.get("RUN_LOCAL").lower() in ['true', 't', '+', '1']
+SAVE_TO_DB = os.environ.get("SAVE_TO_DB").lower() in ['true', 't', '+', '1']
 
-WEBHOOK_PATH = env.str("WEBHOOK_PATH")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_ADMINS = os.environ.get("TELEGRAM_ADMINS").split(',')
+TELEGRAM_NOTIFY_ADMIN = os.environ.get("TELEGRAM_NOTIFY_ADMIN").lower() in ['true', 't', '+', '1']
+TELEGRAM_ONLY_ALLOWED = os.environ.get("TELEGRAM_ONLY_ALLOWED").lower() in ['true', 't', '+', '1']
+TELEGRAM_ALLOWED_USERS = os.environ.get("TELEGRAM_ALLOWED_USERS").split(',')
 
-POSTGRES_HOST = env.str("POSTGRES_HOST")
-POSTGRES_PORT = env.str("POSTGRES_PORT")
-POSTGRES_PASSWORD = env.str("POSTGRES_PASSWORD")
-POSTGRES_USER = env.str("POSTGRES_USER")
-POSTGRES_DB = env.str("POSTGRES_DB")
-POSTGRES_URI = env.str("POSTGRES_URI") or f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:" \
+WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH")
+
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST")
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+POSTGRES_USER = os.environ.get("POSTGRES_USER")
+POSTGRES_DB = os.environ.get("POSTGRES_DB")
+DATABASE_URL = os.environ.get("DATABASE_URL") or f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:" \
                                           f"{POSTGRES_PORT}/{POSTGRES_DB}"

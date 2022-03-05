@@ -3,9 +3,7 @@ import time
 import psycopg2 as ps
 from loguru import logger
 
-from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_URI
-
-global db_connection, cursor
+from data.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL
 
 
 async def create_connection(host: str = None,
@@ -13,7 +11,7 @@ async def create_connection(host: str = None,
                             db_name: str = None,
                             username: str = None,
                             password: str = None,
-                            database_uri: str = None,
+                            database_url: str = None,
                             sslmode: str = 'require'):
     """
     This function creates connection to database.
@@ -23,10 +21,11 @@ async def create_connection(host: str = None,
     :param db_name: Database name,
     :param username: Username of database,
     :param password: User password
-    :param database_uri: URI Identifier
+    :param database_url: URI Identifier
     :param sslmode: Is a secure connection required?
     """
     start_time = time.time()
+
     global db_connection, cursor
 
     _host = host or POSTGRES_HOST
@@ -34,17 +33,20 @@ async def create_connection(host: str = None,
     _db_name = db_name or POSTGRES_DB
     _username = username or POSTGRES_USER
     _password = password or POSTGRES_PASSWORD
-    _db_uri = database_uri or POSTGRES_URI
+    _db_url = database_url or DATABASE_URL
 
     try:
-        db_connection = ps.connect(
-            host=_host,
-            port=_port,
-            database=_db_name,
-            user=_username,
-            password=_password,
-            sslmode=sslmode
-        )
+        if _db_url:
+            db_connection = ps.connect(_db_url)
+        else:
+            db_connection = ps.connect(
+                host=_host,
+                port=_port,
+                database=_db_name,
+                user=_username,
+                password=_password,
+                sslmode=sslmode
+            )
         cursor = db_connection.cursor()
         execute_time = time.time() - start_time
         logger.info(f"Connection to PostgreSQL is successful! (in {str(execute_time)[:5]} sec)")
@@ -98,7 +100,6 @@ async def execute_write_query(table: str = None,
             else:
                 logger.warning(f"The type of 'data' ({type(data)}) is not a tuple! Request may contains an errors!")
                 query = f"INSERT INTO {table} ({columns}) VALUES ({data};)"
-
         cursor.execute(query, data)
         db_connection.commit()
 
@@ -112,7 +113,6 @@ async def execute_write_query(table: str = None,
 
 async def execute_write_query_state(state):
     async with state.proxy() as data:
-        print(tuple(data.values()))
         cursor.execute("INSERT INTO users VALUES %s)", tuple(data.values()))
         db_connection.commit()
 
@@ -159,11 +159,10 @@ async def get_groups(convert_to_str: bool = True):
             # Prepare list items to print.
             if convert_to_str:
                 for item in group_list:
-                    str_groups += f"{item} "
+                    str_groups += f"\n{item}"
 
         execute_time = time.time() - start_time
         logger.debug(f"Read request \"{query}\" completed successfully! (in {str(execute_time)[:5]} sec)")
-        print(str_groups)
         if convert_to_str:
             return str_groups
         else:
