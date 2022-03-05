@@ -17,8 +17,8 @@ btn_survey_group_three = InlineKeyboardButton("IS-33", callback_data=survey_cb.n
 kb_survey_group = InlineKeyboardMarkup().row(btn_survey_group_one, btn_survey_group_two, btn_survey_group_three)
 
 # SUBGROUP:
-btn_survey_subgroup_one = InlineKeyboardButton("First", callback_data=survey_cb.new(field="UserSurveySubgroup", value="subgroup_one"))
-btn_survey_subgroup_two = InlineKeyboardButton("Second", callback_data=survey_cb.new(field="UserSurveySubgroup", value="subgroup_two"))
+btn_survey_subgroup_one = InlineKeyboardButton("Первая", callback_data=survey_cb.new(field="UserSurveySubgroup", value="1"))
+btn_survey_subgroup_two = InlineKeyboardButton("Вторая", callback_data=survey_cb.new(field="UserSurveySubgroup", value="2"))
 kb_survey_subgroup = InlineKeyboardMarkup().row(btn_survey_subgroup_one, btn_survey_subgroup_two)
 
 # CONFIRMATION:

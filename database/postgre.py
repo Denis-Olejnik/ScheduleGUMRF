@@ -159,7 +159,7 @@ async def get_groups(convert_to_str: bool = True):
             # Prepare list items to print.
             if convert_to_str:
                 for item in group_list:
-                    str_groups += f"{item} "
+                    str_groups += f"\n{item}"
 
         execute_time = time.time() - start_time
         logger.debug(f"Read request \"{query}\" completed successfully! (in {str(execute_time)[:5]} sec)")
