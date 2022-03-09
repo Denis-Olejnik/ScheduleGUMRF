@@ -6,6 +6,7 @@ from data import texts, config
 from data.texts import TEXT_USER_NOT_FOUND_IN_DB, TEXT_IN_DEV_MODE, TEXT_USER_MENU
 from database import postgre
 from keyboards import kb_start_user_survey, USER_MENU
+from keyboards.menu.admin_keyboard import ADMIN_MENU
 from loader import dp
 
 
@@ -33,6 +34,17 @@ async def cmd_start(message: types.Message):
                                   reply_markup=kb_start_user_survey)
 
 
+async def cmd_admin(message: types.Message):
+    user_id = message.from_user.id
+    try:
+        if str(user_id) in config.TELEGRAM_ADMINS:
+            await dp.bot.send_message(chat_id=user_id, text='Меню администратора', reply_markup=ADMIN_MENU)
+    except (BadRequest, Unauthorized) as aiogram_error:
+        await dp.bot.send_message(chat_id=user_id, text=aiogram_error, parse_mode=types.ParseMode.HTML)
+        logger.exception(aiogram_error)
+
+
 def register_handlers_base(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands=['start'])
+    dp.register_message_handler(cmd_admin, commands=['admin'])
     logger.debug("Commands handler registered!")

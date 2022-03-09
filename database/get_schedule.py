@@ -100,9 +100,9 @@ async def get_user_schedule_today(group_code: str, week_day: int = None) -> tupl
     day_of_week = week_day or '1'
     try:
         if await is_numerator():
-            query = f"SELECT schedule_numerator FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
+            query = f"SELECT schedule_1 FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
         else:
-            query = f"SELECT schedule_denominator FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
+            query = f"SELECT schedule_0 FROM schedule WHERE group_code='{group_code}' and week_day='{day_of_week}'"
 
         schedule = await postgre.execute_read_query(query)
         if len(schedule) > 0:

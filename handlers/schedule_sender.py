@@ -22,6 +22,7 @@ async def show_schedule(message: types.Message):
 
             # Get user group code:
             user_data = await postgre.execute_read_query(f"SELECT * FROM users WHERE user_id='{user_id}'")
+            print(user_data)
             user_group = f"{user_data[0][2]}_{user_data[0][3]}".replace('-', '_')
 
             schedule = await get_schedule.get_user_schedule_today(user_group, datetime.
